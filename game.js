@@ -4,28 +4,28 @@ const PEOPLE = {
   C: {
     age: "Teenager",
     accent: "#aa78ef",
-    art: "assets/c-forms.webp",
+    art: { flight: "assets/forms/c-flight.webp", chaos: "assets/forms/c-chaos.webp" },
     flight: { animal: "Flamingo", ability: "Stilt vault", description: "Balance, wade, and vault with unnecessary elegance." },
     chaos: { animal: "Red fox", ability: "Burrow dash", description: "Dig shortcuts and outfox objects with no brain." }
   },
   A: {
     age: "Adult",
     accent: "#d84c59",
-    art: "assets/a-forms.webp",
+    art: { flight: "assets/forms/a-flight.webp", chaos: "assets/forms/a-chaos.webp" },
     flight: { animal: "Cassowary", ability: "Airborne violence", description: "Technically flight. Legally an incident." },
     chaos: { animal: "Giant black snake", ability: "Constrict", description: "Crush barriers and move with terrifying purpose." }
   },
   S: {
     age: "Adult",
     accent: "#28c1b5",
-    art: "assets/s-forms.webp",
+    art: { flight: "assets/forms/s-flight.webp", chaos: "assets/forms/s-chaos.webp" },
     flight: { animal: "Crow", ability: "Bright idea", description: "Glide, scout, and attract useful shiny things." },
     chaos: { animal: "Cheetah", ability: "Fast brain", description: "Move so quickly the rest of reality needs a minute." }
   },
   E: {
     age: "Preteen",
     accent: "#f0bd45",
-    art: "assets/e-forms.webp",
+    art: { flight: "assets/forms/e-flight.webp", chaos: "assets/forms/e-chaos.webp" },
     flight: { animal: "Great horned owl", ability: "Night sight", description: "Reveal secrets and move without announcing it." },
     chaos: { animal: "Raccoon", ability: "Rummage", description: "Open containers and convert garbage into progress." }
   }
@@ -40,7 +40,7 @@ const dock = document.querySelector("#character-dock");
 
 function personCard(id) {
   const p = PEOPLE[id];
-  return `<article class="character-card" data-id="${id}" style="--image:url('${p.art}')">
+  return `<article class="character-card" data-id="${id}" style="--flight-image:url('${p.art.flight}');--chaos-image:url('${p.art.chaos}')">
     <div class="card-top"><span class="card-initial">${id}</span><span class="card-age">${p.age}</span></div>
     <div class="form-art" role="img" aria-label="${p.flight.animal} and ${p.chaos.animal} forms"></div>
     <div class="card-copy"><p>${p.flight.ability}</p><h2>${p.flight.animal}</h2><small>${p.flight.description}</small></div>
@@ -65,9 +65,12 @@ function updateRoster(mode) {
 document.querySelectorAll(".form-choice").forEach(button => button.addEventListener("click", () => updateRoster(button.dataset.mode)));
 
 for (const [id, p] of Object.entries(PEOPLE)) {
-  const img = new Image();
-  img.src = p.art;
-  images[id] = img;
+  images[id] = {};
+  for (const mode of ["flight", "chaos"]) {
+    const img = new Image();
+    img.src = p.art[mode];
+    images[id][mode] = img;
+  }
 }
 
 const canvas = document.querySelector("#game-canvas");
@@ -417,15 +420,12 @@ function drawWorld() {
 }
 
 function drawPlayer() {
-  const img = images[state.current];
+  const img = images[state.current][state.mode];
   if (!img.complete || !img.naturalWidth) return;
-  const left = state.mode === "flight";
-  const sx = left ? 0 : img.naturalWidth / 2;
-  const sw = img.naturalWidth / 2;
   let w = state.mode === "flight" ? 230 : 245;
-  let h = w * (img.naturalHeight / sw);
-  if (state.current === "A" && state.mode === "flight") { w = 205; h = w * (img.naturalHeight / sw); }
-  if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / sw); }
+  let h = w * (img.naturalHeight / img.naturalWidth);
+  if (state.current === "A" && state.mode === "flight") { w = 205; h = w * (img.naturalHeight / img.naturalWidth); }
+  if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / img.naturalWidth); }
   const bob = state.grounded ? Math.sin(state.elapsed * 8) * Math.min(3, Math.abs(state.vx) / 2) : 0;
   ctx.save();
   ctx.translate(state.x, state.y + bob);
@@ -438,7 +438,7 @@ function drawPlayer() {
   ctx.fillStyle = "#172019";
   ctx.beginPath(); ctx.ellipse(0, 1, 67, 14, 0, 0, Math.PI * 2); ctx.fill();
   ctx.globalAlpha = 1;
-  ctx.drawImage(img, sx, 0, sw, img.naturalHeight, -w * .5, -h * .78, w, h);
+  ctx.drawImage(img, -w * .5, -h * .78, w, h);
   ctx.restore();
 }
 

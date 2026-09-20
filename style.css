@@ -76,8 +76,8 @@ button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .card-top { position: absolute; z-index: 2; inset: 18px 18px auto; display: flex; justify-content: space-between; align-items: center; }
 .card-initial { display: grid; place-items: center; width: 43px; aspect-ratio: 1; border-radius: 14px; color: #0d1020; background: var(--accent); font-size: 1.35rem; font-weight: 950; }
 .card-age { color: var(--muted); font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
-.form-art { position: absolute; inset: 55px -18% 83px; background-image: var(--image); background-repeat: no-repeat; background-size: 200% auto; background-position: left center; filter: drop-shadow(0 18px 12px rgba(0,0,0,.36)); transition: background-position .5s cubic-bezier(.2,.8,.2,1), transform .5s; }
-.character-card.chaos .form-art { background-position: right center; transform: scale(1.02); }
+.form-art { position: absolute; inset: 55px 5% 83px; background-image: var(--flight-image); background-repeat: no-repeat; background-size: contain; background-position: center; filter: drop-shadow(0 18px 12px rgba(0,0,0,.36)); transition: opacity .2s, transform .5s; }
+.character-card.chaos .form-art { background-image: var(--chaos-image); transform: scale(1.02); }
 .card-copy { position: absolute; z-index: 2; inset: auto 18px 17px; }
 .card-copy p { margin: 0 0 3px; color: var(--muted); font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
 .card-copy h2 { margin: 0; font-size: 1.42rem; }
