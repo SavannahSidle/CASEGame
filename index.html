@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101426">
+  <title>CASE: Creature Chaos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <main>
+    <section id="home" class="screen active" aria-labelledby="game-title">
+      <header class="hero">
+        <p class="eyebrow">Four humans. Eight forms. Poor supervision.</p>
+        <h1 id="game-title"><span>C</span><span>A</span><span>S</span><span>E</span></h1>
+        <p class="subtitle">Creature Chaos</p>
+        <p class="intro">Swap people, transform forms, and survive one extremely avoidable backyard incident.</p>
+      </header>
+
+      <div class="roster" id="roster" aria-label="Character roster"></div>
+
+      <div class="launch-panel">
+        <div>
+          <p class="launch-label">Starting form</p>
+          <div class="segmented" role="group" aria-label="Starting form">
+            <button class="form-choice selected" data-mode="flight" type="button">Flight forms</button>
+            <button class="form-choice" data-mode="chaos" type="button">Chaos forms</button>
+          </div>
+        </div>
+        <button id="start-button" class="primary" type="button">Start the incident</button>
+      </div>
+    </section>
+
+    <section id="game" class="screen" aria-label="CASE game">
+      <div class="game-shell">
+        <header class="game-bar">
+          <button id="home-button" class="icon-button" type="button" aria-label="Return to character screen">←</button>
+          <div class="identity">
+            <span id="active-initial" class="initial">C</span>
+            <span><strong id="active-animal">Flamingo</strong><small id="active-form">Flight form</small></span>
+          </div>
+          <div class="objective"><span id="case-count">0 / 4</span><small>CASE sparks</small></div>
+          <button id="sound-button" class="icon-button" type="button" aria-label="Toggle sound">♪</button>
+        </header>
+
+        <div class="canvas-wrap">
+          <canvas id="game-canvas" width="1440" height="810" aria-label="Playable CASE level"></canvas>
+          <div id="toast" class="toast" role="status"></div>
+          <div id="finish-card" class="finish-card" hidden>
+            <p class="eyebrow">Incident contained-ish</p>
+            <h2>Picnic recovered.</h2>
+            <p>Everyone survived. The property value did not.</p>
+            <button id="replay-button" class="primary" type="button">Cause it again</button>
+          </div>
+        </div>
+
+        <div class="character-dock" id="character-dock" aria-label="Switch character"></div>
+
+        <div class="mobile-controls" aria-label="Game controls">
+          <div class="move-controls">
+            <button data-control="left" aria-label="Move left">◀</button>
+            <button data-control="right" aria-label="Move right">▶</button>
+          </div>
+          <div class="action-controls">
+            <button data-control="transform" class="transform">↻<small>FORM</small></button>
+            <button data-control="ability" class="ability">✦<small>ABILITY</small></button>
+            <button data-control="jump">↑<small>JUMP</small></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
