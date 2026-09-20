@@ -94,14 +94,22 @@ const state = {
   reveal: 0,
   ability: 0,
   elapsed: 0,
-  finished: false
+  finished: false,
+  level: "space",
+  spaceSparks: new Set(),
+  motionPhase: 0,
+  transformFlash: 0,
+  landing: 0,
+  trail: [],
+  trailClock: 0
 };
 
 const keys = { left: false, right: false, jump: false };
-const WORLD_WIDTH = 4100;
+const BACKYARD_WIDTH = 4100;
+const SPACE_WIDTH = 3000;
 const GROUND = 650;
 const platforms = [
-  { x: 0, y: GROUND, w: WORLD_WIDTH, h: 180 },
+  { x: 0, y: GROUND, w: BACKYARD_WIDTH, h: 180 },
   { x: 420, y: 550, w: 250, h: 28 },
   { x: 930, y: 500, w: 230, h: 28 },
   { x: 1290, y: 565, w: 270, h: 28 },
@@ -117,6 +125,12 @@ const sparkData = [
   { id: "S", x: 2290, y: 475, color: PEOPLE.S.accent },
   { id: "E", x: 2820, y: 385, color: PEOPLE.E.accent }
 ];
+const cosmicSparkData = [
+  { id: "C", x: 520, y: 275, color: PEOPLE.C.accent },
+  { id: "A", x: 1120, y: 530, color: PEOPLE.A.accent },
+  { id: "S", x: 1780, y: 235, color: PEOPLE.S.accent },
+  { id: "E", x: 2350, y: 500, color: PEOPLE.E.accent }
+];
 const crates = [
   { id: 1, x: 770, y: 560, w: 80, h: 90 },
   { id: 2, x: 2030, y: 570, w: 80, h: 80 },
@@ -124,8 +138,9 @@ const crates = [
 ];
 
 function resetGame() {
-  Object.assign(state, { running: true, current: "C", mode: selectedMode, x: 120, y: 540, vx: 0, vy: 0, grounded: false, facing: 1, camera: 0, reveal: 0, ability: 0, elapsed: 0, finished: false });
+  Object.assign(state, { running: true, current: "C", mode: selectedMode, x: 120, y: 400, vx: 0, vy: 0, grounded: false, facing: 1, camera: 0, reveal: 0, ability: 0, elapsed: 0, finished: false, level: "space", motionPhase: 0, transformFlash: 0, landing: 0, trail: [], trailClock: 0 });
   state.sparks.clear();
+  state.spaceSparks.clear();
   state.smashed.clear();
   finishCard.hidden = true;
   updateHud();
@@ -155,6 +170,8 @@ function switchCharacter(id) {
   if (!PEOPLE[id]) return;
   state.current = id;
   state.ability = 0;
+  state.transformFlash = .28;
+  state.trail = [];
   updateHud();
   say(`${id}: ${PEOPLE[id][state.mode].animal}`);
 }
@@ -162,6 +179,8 @@ function switchCharacter(id) {
 function transform() {
   state.mode = state.mode === "flight" ? "chaos" : "flight";
   state.ability = 0;
+  state.transformFlash = .38;
+  state.trail = [];
   updateHud();
   say(`${PEOPLE[state.current][state.mode].animal} form!`);
 }
@@ -174,7 +193,9 @@ function updateHud() {
   initial.style.background = p.accent;
   document.querySelector("#active-animal").textContent = f.animal;
   document.querySelector("#active-form").textContent = `${state.mode === "flight" ? "Flight" : "Chaos"} form · ${f.ability}`;
-  document.querySelector("#case-count").textContent = `${state.sparks.size} / 4`;
+  const count = state.level === "space" ? state.spaceSparks.size : state.sparks.size;
+  document.querySelector("#case-count").textContent = `${count} / 4`;
+  document.querySelector("#objective-label").textContent = state.level === "space" ? "cosmic sparks" : "CASE sparks";
   buildDock();
   dock.querySelectorAll("button").forEach(button => button.classList.toggle("selected", button.dataset.id === state.current));
 }
@@ -219,6 +240,10 @@ function revealNearby(rummage = false) {
 }
 
 function jump() {
+  if (state.level === "space") {
+    state.vy = Math.max(-9, state.vy - 4.5);
+    return;
+  }
   if (state.grounded) {
     const bonus = state.current === "C" && state.mode === "flight" ? 4 : 0;
     state.vy = -13.5 - bonus;
@@ -267,24 +292,59 @@ function collides(a, b) {
 function update(dt) {
   if (!state.running || state.finished) return;
   state.elapsed += dt;
+  state.motionPhase += dt * (2.4 + Math.abs(state.vx) * 1.15);
   state.ability = Math.max(0, state.ability - dt);
   state.reveal = Math.max(0, state.reveal - dt);
+  state.transformFlash = Math.max(0, state.transformFlash - dt);
+  state.landing = Math.max(0, state.landing - dt);
+  state.trailClock -= dt;
 
-  let speed = 7.1;
+  let speed = state.level === "space" ? 6.2 : 7.1;
   if (state.mode === "chaos" && state.current === "S") speed = 9.5;
   if (state.mode === "chaos" && state.current === "A") speed = 5.6;
   if (keys.left) { state.vx -= 1.25; state.facing = -1; }
   if (keys.right) { state.vx += 1.25; state.facing = 1; }
   if (!keys.left && !keys.right) state.vx *= .8;
   state.vx = Math.max(-speed, Math.min(speed, state.vx));
-  state.vy += state.mode === "flight" && state.current !== "A" && keys.jump ? .35 : .72;
-  state.vy = Math.min(state.vy, 18);
+  if (state.level === "space") {
+    state.vy += (410 - state.y) * .0018;
+    state.vy *= .992;
+  } else {
+    state.vy += state.mode === "flight" && state.current !== "A" && keys.jump ? .35 : .72;
+    state.vy = Math.min(state.vy, 18);
+  }
 
   const previousY = state.y;
   state.x += state.vx;
-  state.x = Math.max(30, Math.min(WORLD_WIDTH - 80, state.x));
+  const worldWidth = state.level === "space" ? SPACE_WIDTH : BACKYARD_WIDTH;
+  state.x = Math.max(30, Math.min(worldWidth - 80, state.x));
   state.y += state.vy;
+  const wasGrounded = state.grounded;
   state.grounded = false;
+
+  if (state.level === "space") {
+    if (state.y < 120) { state.y = 120; state.vy = Math.abs(state.vy) * .6; }
+    if (state.y > 690) { state.y = 690; state.vy = -Math.abs(state.vy) * .6; }
+    cosmicSparkData.forEach(spark => {
+      if (!state.spaceSparks.has(spark.id) && Math.hypot(state.x - spark.x, (state.y - 35) - spark.y) < 85) {
+        state.spaceSparks.add(spark.id);
+        say(`${spark.id} cosmic spark recovered!`);
+        updateHud();
+      }
+    });
+    if (state.x > 2720) {
+      if (state.spaceSparks.size === 4) enterBackyard();
+      else if (!state.endWarned) {
+        state.endWarned = true;
+        say("The wormhole demands all four sparks. Naturally.");
+        setTimeout(() => state.endWarned = false, 1800);
+      }
+    }
+    const targetCamera = Math.max(0, Math.min(SPACE_WIDTH - canvas.width, state.x - canvas.width * .38));
+    state.camera += (targetCamera - state.camera) * .09;
+    updateMotionTrail(dt);
+    return;
+  }
 
   const body = { x: state.x - 34, y: state.y - 60, w: 68, h: 60 };
   platforms.forEach(platform => {
@@ -294,6 +354,8 @@ function update(dt) {
       state.grounded = true;
     }
   });
+
+  if (!wasGrounded && state.grounded) state.landing = .18;
 
   crates.forEach(crate => {
     if (state.smashed.has(crate.id)) return;
@@ -326,8 +388,32 @@ function update(dt) {
     }
   }
 
-  const targetCamera = Math.max(0, Math.min(WORLD_WIDTH - canvas.width, state.x - canvas.width * .38));
+  const targetCamera = Math.max(0, Math.min(BACKYARD_WIDTH - canvas.width, state.x - canvas.width * .38));
   state.camera += (targetCamera - state.camera) * .09;
+  updateMotionTrail(dt);
+}
+
+function updateMotionTrail() {
+  const fast = Math.abs(state.vx) > 8 || state.ability > .05;
+  if (fast && state.trailClock <= 0) {
+    state.trail.unshift({ x: state.x, y: state.y, facing: state.facing, life: .24, phase: state.motionPhase });
+    state.trail = state.trail.slice(0, 4);
+    state.trailClock = .045;
+  }
+  state.trail.forEach(item => item.life -= .016);
+  state.trail = state.trail.filter(item => item.life > 0);
+}
+
+function enterBackyard() {
+  state.level = "backyard";
+  state.x = 120;
+  state.y = 380;
+  state.vx = 0;
+  state.vy = 2;
+  state.camera = 0;
+  state.elapsed = 0;
+  updateHud();
+  say("Gravity found. Regrettably.");
 }
 
 function roundedRect(x, y, w, h, r) {
@@ -336,6 +422,10 @@ function roundedRect(x, y, w, h, r) {
 }
 
 function drawBackground() {
+  if (state.level === "space") {
+    drawSpaceBackground();
+    return;
+  }
   const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
   gradient.addColorStop(0, "#77b7bd");
   gradient.addColorStop(.55, "#d7d2a8");
@@ -365,15 +455,44 @@ function drawBackground() {
   ctx.fillRect(0, 555, canvas.width, 18);
 }
 
+function drawSpaceBackground() {
+  const gradient = ctx.createRadialGradient(canvas.width * .6, canvas.height * .45, 10, canvas.width * .5, canvas.height * .5, canvas.width);
+  gradient.addColorStop(0, "#25376d");
+  gradient.addColorStop(.45, "#11183e");
+  gradient.addColorStop(1, "#040611");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < 145; i++) {
+    const depth = 1 + (i % 3);
+    const x = ((i * 173 - state.camera * (.03 * depth)) % (canvas.width + 80) + canvas.width + 80) % (canvas.width + 80) - 40;
+    const y = (i * 97 + (i % 7) * 31) % canvas.height;
+    const pulse = .55 + Math.sin(state.elapsed * (1 + i % 4) + i) * .35;
+    ctx.globalAlpha = pulse;
+    ctx.fillStyle = i % 13 === 0 ? "#a9d9ff" : "#fff";
+    ctx.beginPath(); ctx.arc(x, y, i % 11 === 0 ? 2.3 : 1, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = "rgba(111,73,176,.18)";
+  ctx.beginPath(); ctx.ellipse(1050, 250, 430, 105, -.18, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(43,186,193,.12)";
+  ctx.beginPath(); ctx.ellipse(300, 620, 520, 90, .12, 0, Math.PI * 2); ctx.fill();
+}
+
 function drawWorld() {
+  if (state.level === "space") {
+    drawSpaceWorld();
+    return;
+  }
   ctx.save();
   ctx.translate(-state.camera, 0);
 
   ctx.fillStyle = "#66814b";
-  ctx.fillRect(0, GROUND, WORLD_WIDTH, 180);
+  ctx.fillRect(0, GROUND, BACKYARD_WIDTH, 180);
   ctx.fillStyle = "#78985c";
-  ctx.fillRect(0, GROUND, WORLD_WIDTH, 16);
-  for (let x = 0; x < WORLD_WIDTH; x += 44) {
+  ctx.fillRect(0, GROUND, BACKYARD_WIDTH, 16);
+  for (let x = 0; x < BACKYARD_WIDTH; x += 44) {
     ctx.strokeStyle = x % 88 ? "#8cab68" : "#53733d";
     ctx.lineWidth = 4;
     ctx.beginPath(); ctx.moveTo(x, GROUND + 3); ctx.quadraticCurveTo(x + 7, GROUND - 14, x + 13, GROUND - 2); ctx.stroke();
@@ -419,6 +538,54 @@ function drawWorld() {
   ctx.restore();
 }
 
+function drawSpaceWorld() {
+  ctx.save();
+  ctx.translate(-state.camera, 0);
+
+  // Slow tumbling rocks: dangerous-looking, spiritually harmless.
+  const asteroids = [
+    { x: 820, y: 160, r: 48 }, { x: 1450, y: 610, r: 62 },
+    { x: 2050, y: 390, r: 42 }, { x: 2520, y: 130, r: 54 }
+  ];
+  asteroids.forEach((rock, i) => {
+    ctx.save(); ctx.translate(rock.x, rock.y); ctx.rotate(state.elapsed * (.08 + i * .025));
+    ctx.fillStyle = i % 2 ? "#5d5870" : "#6b6278";
+    ctx.beginPath();
+    for (let p = 0; p < 9; p++) {
+      const angle = p / 9 * Math.PI * 2;
+      const radius = rock.r * (.78 + ((p * 7) % 5) * .055);
+      const x = Math.cos(angle) * radius, y = Math.sin(angle) * radius;
+      p ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "rgba(20,18,35,.32)";
+    ctx.beginPath(); ctx.arc(-rock.r * .24, -rock.r * .12, rock.r * .19, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  });
+
+  cosmicSparkData.forEach((spark, index) => {
+    if (state.spaceSparks.has(spark.id)) return;
+    const bob = Math.sin(state.elapsed * 2.5 + index) * 13;
+    const glow = ctx.createRadialGradient(spark.x, spark.y + bob, 4, spark.x, spark.y + bob, 70);
+    glow.addColorStop(0, spark.color + "ee"); glow.addColorStop(1, spark.color + "00");
+    ctx.fillStyle = glow; ctx.fillRect(spark.x - 75, spark.y + bob - 75, 150, 150);
+    ctx.fillStyle = spark.color; ctx.font = "950 50px system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.shadowColor = spark.color; ctx.shadowBlur = 22; ctx.fillText(spark.id, spark.x, spark.y + bob); ctx.shadowBlur = 0;
+  });
+
+  const portalX = 2820, portalY = 400;
+  ctx.save(); ctx.translate(portalX, portalY); ctx.rotate(state.elapsed * .35);
+  for (let i = 0; i < 8; i++) {
+    ctx.strokeStyle = `hsla(${265 + i * 9}, 90%, ${64 + i * 2}%, ${.8 - i * .07})`;
+    ctx.lineWidth = 9 - i * .7;
+    ctx.beginPath(); ctx.ellipse(0, 0, 72 + i * 13, 145 - i * 7, i * .13, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.restore();
+
+  drawPlayer();
+  ctx.restore();
+}
+
 function drawPlayer() {
   const img = images[state.current][state.mode];
   if (!img.complete || !img.naturalWidth) return;
@@ -426,19 +593,115 @@ function drawPlayer() {
   let h = w * (img.naturalHeight / img.naturalWidth);
   if (state.current === "A" && state.mode === "flight") { w = 205; h = w * (img.naturalHeight / img.naturalWidth); }
   if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / img.naturalWidth); }
-  const bob = state.grounded ? Math.sin(state.elapsed * 8) * Math.min(3, Math.abs(state.vx) / 2) : 0;
+  const motion = creatureMotion();
+
+  if (state.level !== "space") {
+    ctx.save();
+    ctx.globalAlpha = .2 * (1 - Math.min(1, Math.abs(state.y - GROUND) / 260));
+    ctx.fillStyle = "#172019";
+    ctx.beginPath();
+    ctx.ellipse(state.x, state.y + 3, 69 * motion.shadowScale, 13 * motion.shadowScale, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  state.trail.slice().reverse().forEach((trail, index) => {
+    const alpha = Math.max(0, trail.life) * (.22 + index * .025);
+    drawCreature(img, w, h, { ...motion, x: trail.x, y: trail.y, facing: trail.facing, alpha, blur: 5, ghost: true });
+  });
+  drawCreature(img, w, h, motion);
+
+  if (state.transformFlash > 0) {
+    const progress = state.transformFlash / .38;
+    ctx.save();
+    ctx.strokeStyle = PEOPLE[state.current].accent + "bb";
+    ctx.lineWidth = 5 * progress;
+    ctx.globalAlpha = progress;
+    ctx.beginPath();
+    ctx.arc(state.x, state.y - h * .36, 70 + (1 - progress) * 110, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function creatureMotion() {
+  const moving = Math.min(1, Math.abs(state.vx) / 7);
+  const phase = state.motionPhase;
+  const motion = {
+    x: state.x,
+    y: state.y,
+    facing: state.facing,
+    alpha: 1,
+    rotation: 0,
+    scaleX: 1,
+    scaleY: 1,
+    shadowScale: 1,
+    wave: 0,
+    blur: 0
+  };
+
+  if (state.level === "space") {
+    motion.y += Math.sin(state.elapsed * .9 + state.current.charCodeAt(0)) * 7;
+    motion.rotation = Math.sin(state.elapsed * .55) * .055 + state.vy * .018 + state.vx * .004;
+    motion.scaleY = 1 + Math.sin(state.elapsed * 1.3) * .012;
+    motion.scaleX = 2 - motion.scaleY;
+    return motion;
+  }
+
+  if (state.mode === "flight" && state.current !== "A") {
+    const wingbeat = Math.sin(phase * 1.35);
+    motion.y += state.grounded ? -Math.abs(wingbeat) * 3 : wingbeat * 5;
+    motion.rotation = Math.max(-.16, Math.min(.16, state.vy * .018)) + Math.sin(phase * .45) * .018;
+    motion.scaleY = 1 + wingbeat * .032;
+    motion.scaleX = 1 - wingbeat * .018;
+    motion.shadowScale = state.grounded ? 1 : .68;
+  } else if (state.current === "A" && state.mode === "chaos") {
+    motion.y += Math.sin(phase) * 3 * moving;
+    motion.rotation = Math.sin(phase * .55) * .042 * moving;
+    motion.wave = 5.5 * moving;
+    motion.scaleX = 1 + Math.sin(phase) * .012;
+  } else {
+    const stride = Math.sin(phase);
+    const bound = Math.abs(Math.sin(phase * .5));
+    motion.y -= bound * (5 + moving * 7);
+    motion.rotation = stride * .026 * moving - state.vx * .003;
+    motion.scaleX = 1 + bound * .035 * moving;
+    motion.scaleY = 1 - bound * .026 * moving;
+    motion.shadowScale = 1 - bound * .17 * moving;
+  }
+
+  if (state.landing > 0) {
+    const squash = Math.sin((state.landing / .18) * Math.PI) * .09;
+    motion.scaleX += squash;
+    motion.scaleY -= squash;
+    motion.y += squash * 28;
+  }
+  return motion;
+}
+
+function drawCreature(img, w, h, motion) {
   ctx.save();
-  ctx.translate(state.x, state.y + bob);
-  ctx.scale(state.facing, 1);
-  if (state.ability > 0) {
+  ctx.globalAlpha = motion.alpha ?? 1;
+  ctx.translate(motion.x, motion.y);
+  ctx.rotate(motion.rotation || 0);
+  ctx.scale((motion.facing || 1) * (motion.scaleX || 1), motion.scaleY || 1);
+  if (motion.blur) ctx.filter = `blur(${motion.blur}px)`;
+  if (state.ability > 0 && !motion.ghost) {
     ctx.shadowColor = PEOPLE[state.current].accent;
     ctx.shadowBlur = 28;
   }
-  ctx.globalAlpha = .2;
-  ctx.fillStyle = "#172019";
-  ctx.beginPath(); ctx.ellipse(0, 1, 67, 14, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.globalAlpha = 1;
-  ctx.drawImage(img, -w * .5, -h * .78, w, h);
+
+  if (motion.wave && !motion.ghost) {
+    const strips = 14;
+    const sourceW = img.naturalWidth / strips;
+    const drawW = w / strips;
+    for (let i = 0; i < strips; i++) {
+      const offset = Math.sin(state.motionPhase + i * .62) * motion.wave;
+      ctx.drawImage(img, i * sourceW, 0, sourceW + 1, img.naturalHeight, -w * .5 + i * drawW, -h * .78 + offset, drawW + 1, h);
+    }
+  } else {
+    ctx.drawImage(img, -w * .5, -h * .78, w, h);
+  }
   ctx.restore();
 }
 

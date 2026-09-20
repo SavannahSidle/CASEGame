@@ -1,6 +1,6 @@
 # CASE: Creature Chaos
 
-A silly, easy browser adventure for four people with two animal forms each.
+A silly, easy browser adventure for four people with two animal forms each. The game begins in zero-gravity space, because apparently Earth was too straightforward.
 
 ## Current forms
 
