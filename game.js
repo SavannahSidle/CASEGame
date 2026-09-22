@@ -4,28 +4,32 @@ const PEOPLE = {
   C: {
     age: "Teenager",
     accent: "#aa78ef",
-    art: { flight: "assets/forms/c-flight.webp", chaos: "assets/forms/c-chaos.webp" },
+    art: { human: "assets/forms/c-human.webp", run: "assets/forms/c-human-run.webp", flight: "assets/forms/c-flight.webp", chaos: "assets/forms/c-chaos.webp" },
+    human: { animal: "C", ability: "Improvised vault", description: "Find the shortcut by confidently making one up." },
     flight: { animal: "Flamingo", ability: "Stilt vault", description: "Balance, wade, and vault with unnecessary elegance." },
     chaos: { animal: "Red fox", ability: "Burrow dash", description: "Dig shortcuts and outfox objects with no brain." }
   },
   A: {
     age: "Adult",
     accent: "#d84c59",
-    art: { flight: "assets/forms/a-flight.webp", chaos: "assets/forms/a-chaos.webp" },
+    art: { human: "assets/forms/a-human.webp", run: "assets/forms/a-human-run.webp", flight: "assets/forms/a-flight.webp", chaos: "assets/forms/a-chaos.webp" },
+    human: { animal: "A", ability: "Protective force", description: "Remove an obstacle from everyone else's problem list." },
     flight: { animal: "Cassowary", ability: "Airborne violence", description: "Technically flight. Legally an incident." },
     chaos: { animal: "Giant black snake", ability: "Constrict", description: "Crush barriers and move with terrifying purpose." }
   },
   S: {
     age: "Adult",
-    accent: "#28c1b5",
-    art: { flight: "assets/forms/s-flight.webp", chaos: "assets/forms/s-chaos.webp" },
+    accent: "#91a99b",
+    art: { human: "assets/forms/s-human.webp", run: "assets/forms/s-human-run.webp", flight: "assets/forms/s-flight.webp", chaos: "assets/forms/s-chaos.webp" },
+    human: { animal: "S", ability: "Rapid plan", description: "Think three moves ahead, then run there immediately." },
     flight: { animal: "Crow", ability: "Bright idea", description: "Glide, scout, and attract useful shiny things." },
     chaos: { animal: "Cheetah", ability: "Fast brain", description: "Move so quickly the rest of reality needs a minute." }
   },
   E: {
     age: "Preteen",
-    accent: "#f0bd45",
-    art: { flight: "assets/forms/e-flight.webp", chaos: "assets/forms/e-chaos.webp" },
+    accent: "#20c9c3",
+    art: { human: "assets/forms/e-human.webp", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-flight.webp", chaos: "assets/forms/e-chaos.webp" },
+    human: { animal: "E", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
     flight: { animal: "Great horned owl", ability: "Night sight", description: "Reveal secrets and move without announcing it." },
     chaos: { animal: "Raccoon", ability: "Rummage", description: "Open containers and convert garbage into progress." }
   }
@@ -33,17 +37,18 @@ const PEOPLE = {
 
 const order = ["C", "A", "S", "E"];
 const images = {};
-let selectedMode = "flight";
+const modes = ["human", "flight", "chaos"];
+let selectedMode = "human";
 
 const roster = document.querySelector("#roster");
 const dock = document.querySelector("#character-dock");
 
 function personCard(id) {
   const p = PEOPLE[id];
-  return `<article class="character-card" data-id="${id}" style="--flight-image:url('${p.art.flight}');--chaos-image:url('${p.art.chaos}')">
+  return `<article class="character-card" data-id="${id}" style="--human-image:url('${p.art.human}');--flight-image:url('${p.art.flight}');--chaos-image:url('${p.art.chaos}')">
     <div class="card-top"><span class="card-initial">${id}</span><span class="card-age">${p.age}</span></div>
-    <div class="form-art" role="img" aria-label="${p.flight.animal} and ${p.chaos.animal} forms"></div>
-    <div class="card-copy"><p>${p.flight.ability}</p><h2>${p.flight.animal}</h2><small>${p.flight.description}</small></div>
+    <div class="form-art" role="img" aria-label="Human, ${p.flight.animal}, and ${p.chaos.animal} forms"></div>
+    <div class="card-copy"><p>${p.human.ability}</p><h2>${p.human.animal}</h2><small>${p.human.description}</small></div>
   </article>`;
 }
 
@@ -55,6 +60,7 @@ function updateRoster(mode) {
   document.querySelectorAll(".character-card").forEach(card => {
     const p = PEOPLE[card.dataset.id];
     const form = p[mode];
+    card.classList.toggle("flight", mode === "flight");
     card.classList.toggle("chaos", mode === "chaos");
     card.querySelector(".card-copy p").textContent = form.ability;
     card.querySelector(".card-copy h2").textContent = form.animal;
@@ -66,7 +72,7 @@ document.querySelectorAll(".form-choice").forEach(button => button.addEventListe
 
 for (const [id, p] of Object.entries(PEOPLE)) {
   images[id] = {};
-  for (const mode of ["flight", "chaos"]) {
+  for (const mode of [...modes, "run"]) {
     const img = new Image();
     img.src = p.art[mode];
     images[id][mode] = img;
@@ -81,7 +87,7 @@ const finishCard = document.querySelector("#finish-card");
 const state = {
   running: false,
   current: "C",
-  mode: "flight",
+  mode: "human",
   x: 120,
   y: 540,
   vx: 0,
@@ -177,7 +183,7 @@ function switchCharacter(id) {
 }
 
 function transform() {
-  state.mode = state.mode === "flight" ? "chaos" : "flight";
+  state.mode = modes[(modes.indexOf(state.mode) + 1) % modes.length];
   state.ability = 0;
   state.transformFlash = .38;
   state.trail = [];
@@ -192,7 +198,8 @@ function updateHud() {
   initial.textContent = state.current;
   initial.style.background = p.accent;
   document.querySelector("#active-animal").textContent = f.animal;
-  document.querySelector("#active-form").textContent = `${state.mode === "flight" ? "Flight" : "Chaos"} form · ${f.ability}`;
+  const formName = state.mode[0].toUpperCase() + state.mode.slice(1);
+  document.querySelector("#active-form").textContent = `${formName} form · ${f.ability}`;
   const count = state.level === "space" ? state.spaceSparks.size : state.sparks.size;
   document.querySelector("#case-count").textContent = `${count} / 4`;
   document.querySelector("#objective-label").textContent = state.level === "space" ? "cosmic sparks" : "CASE sparks";
@@ -211,7 +218,12 @@ function say(message) {
 function useAbility() {
   const id = state.current;
   state.ability = .65;
-  if (state.mode === "flight") {
+  if (state.mode === "human") {
+    if (id === "C") { state.vy = -16; state.vx += state.facing * 4; }
+    if (id === "A") smashNearby(165);
+    if (id === "S") { state.vx = state.facing * 13; state.reveal = 2.5; }
+    if (id === "E") state.vx = state.facing * 17;
+  } else if (state.mode === "flight") {
     if (id === "C") state.vy = -17;
     if (id === "A") { state.vx = state.facing * 19; smashNearby(150); }
     if (id === "S") { state.vy = Math.min(state.vy, -4); state.vx += state.facing * 7; }
@@ -300,6 +312,8 @@ function update(dt) {
   state.trailClock -= dt;
 
   let speed = state.level === "space" ? 6.2 : 7.1;
+  if (state.mode === "human" && state.current === "S") speed = 8.1;
+  if (state.mode === "human" && state.current === "E") speed = 8.6;
   if (state.mode === "chaos" && state.current === "S") speed = 9.5;
   if (state.mode === "chaos" && state.current === "A") speed = 5.6;
   if (keys.left) { state.vx -= 1.25; state.facing = -1; }
@@ -587,13 +601,23 @@ function drawSpaceWorld() {
 }
 
 function drawPlayer() {
-  const img = images[state.current][state.mode];
+  const runningHuman = state.mode === "human" && state.level !== "space" && (Math.abs(state.vx) > .45 || !state.grounded);
+  const img = runningHuman ? images[state.current].run : images[state.current][state.mode];
   if (!img.complete || !img.naturalWidth) return;
-  let w = state.mode === "flight" ? 230 : 245;
+  let w = state.mode === "human" ? 150 : state.mode === "flight" ? 230 : 245;
   let h = w * (img.naturalHeight / img.naturalWidth);
+  if (state.mode === "human") {
+    const humanWidths = { C: 155, A: 145, S: 142, E: 148 };
+    w = humanWidths[state.current];
+    h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / 4)) : w * (img.naturalHeight / img.naturalWidth);
+  }
   if (state.current === "A" && state.mode === "flight") { w = 205; h = w * (img.naturalHeight / img.naturalWidth); }
   if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / img.naturalWidth); }
   const motion = creatureMotion();
+  if (runningHuman) {
+    motion.frameIndex = state.grounded ? Math.floor(state.motionPhase * .9) % 4 : 3;
+    motion.frameCount = 4;
+  }
 
   if (state.level !== "space") {
     ctx.save();
@@ -655,6 +679,9 @@ function creatureMotion() {
     motion.scaleY = 1 + wingbeat * .032;
     motion.scaleX = 1 - wingbeat * .018;
     motion.shadowScale = state.grounded ? 1 : .68;
+  } else if (state.mode === "human") {
+    motion.rotation = Math.max(-.08, Math.min(.08, state.vy * .008)) - state.vx * .0015;
+    motion.shadowScale = state.grounded ? 1 : .72;
   } else if (state.current === "A" && state.mode === "chaos") {
     motion.y += Math.sin(phase) * 3 * moving;
     motion.rotation = Math.sin(phase * .55) * .042 * moving;
@@ -691,7 +718,11 @@ function drawCreature(img, w, h, motion) {
     ctx.shadowBlur = 28;
   }
 
-  if (motion.wave && !motion.ghost) {
+  if (Number.isInteger(motion.frameIndex)) {
+    const frameCount = motion.frameCount || 1;
+    const sourceW = img.naturalWidth / frameCount;
+    ctx.drawImage(img, motion.frameIndex * sourceW, 0, sourceW, img.naturalHeight, -w * .5, -h * .78, w, h);
+  } else if (motion.wave && !motion.ghost) {
     const strips = 14;
     const sourceW = img.naturalWidth / strips;
     const drawW = w / strips;
@@ -728,5 +759,5 @@ function loop(time) {
   requestAnimationFrame(loop);
 }
 
-updateRoster("flight");
+updateRoster("human");
 buildDock();

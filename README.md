@@ -1,15 +1,15 @@
 # CASE: Creature Chaos
 
-A silly, easy browser adventure for four people with two animal forms each. The game begins in zero-gravity space, because apparently Earth was too straightforward.
+A silly, easy browser adventure for four people with human, flight, and chaos forms. The game begins in zero-gravity space, because apparently Earth was too straightforward.
 
 ## Current forms
 
-| Character | Flight form | Chaos form |
-|---|---|---|
-| C | Flamingo | Red fox |
-| A | Cassowary | Giant black snake |
-| S | Crow | Cheetah |
-| E | Great horned owl | Raccoon |
+| Character | Human ability | Flight form | Chaos form |
+|---|---|---|---|
+| C | Improvised vault | Flamingo | Red fox |
+| A | Protective force | Cassowary | Giant black snake |
+| S | Rapid plan | Crow | Cheetah |
+| E | Quick thinking | Great horned owl | Raccoon |
 
 Aquatic forms and additional animal groups are intentionally reserved for much later unlock systems.
 
@@ -25,7 +25,7 @@ Aquatic forms and additional animal groups are intentionally reserved for much l
 - Move: `A` / `D` or arrow keys
 - Jump: `Space`, `W`, or up arrow
 - Ability: `E`
-- Transform: `F` or `Shift`
+- Transform: `F` or `Shift` cycles Human → Flight → Chaos
 - Switch character: `1`–`4`, the character's initial, or the on-screen character dock
 
 Touch controls are included for phones and tablets.
