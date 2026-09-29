@@ -111,8 +111,9 @@ const state = {
   trailClock: 0
 };
 
-const keys = { left: false, right: false, jump: false };
+const keys = { left: false, right: false, jump: false, down: false };
 const BACKYARD_WIDTH = 4100;
+const FOREST_WIDTH = 1900;
 const SPACE_WIDTH = 3000;
 const GROUND = 650;
 const platforms = [
@@ -145,12 +146,13 @@ const crates = [
 ];
 
 function resetGame() {
-  Object.assign(state, { running: true, current: "C", mode: selectedMode, x: 120, y: 400, vx: 0, vy: 0, grounded: false, facing: 1, camera: 0, reveal: 0, ability: 0, elapsed: 0, finished: false, level: "space", motionPhase: 0, transformFlash: 0, landing: 0, trail: [], trailClock: 0 });
+  Object.assign(state, { running: true, current: "C", mode: selectedMode, x: 120, y: GROUND, vx: 0, vy: 0, grounded: true, facing: 1, camera: 0, reveal: 0, ability: 0, elapsed: 0, finished: false, level: "forest", motionPhase: 0, transformFlash: 0, landing: 0, trail: [], trailClock: 0 });
   state.sparks.clear();
   state.spaceSparks.clear();
   state.smashed.clear();
   finishCard.hidden = true;
   updateHud();
+  say("Run through the forest and find the glowing portal.");
 }
 
 function startGame() {
@@ -202,8 +204,8 @@ function updateHud() {
   const formName = state.mode[0].toUpperCase() + state.mode.slice(1);
   document.querySelector("#active-form").textContent = `${formName} form · ${f.ability}`;
   const count = state.level === "space" ? state.spaceSparks.size : state.sparks.size;
-  document.querySelector("#case-count").textContent = `${count} / 4`;
-  document.querySelector("#objective-label").textContent = state.level === "space" ? "cosmic sparks" : "CASE sparks";
+  document.querySelector("#case-count").textContent = state.level === "forest" ? "→" : `${count} / 4`;
+  document.querySelector("#objective-label").textContent = state.level === "forest" ? "find the clearing" : state.level === "space" ? "cosmic sparks" : "CASE sparks";
   buildDock();
   dock.querySelectorAll("button").forEach(button => button.classList.toggle("selected", button.dataset.id === state.current));
 }
@@ -267,20 +269,22 @@ function jump() {
 }
 
 window.addEventListener("keydown", event => {
-  if (["ArrowLeft", "ArrowRight", "ArrowUp", " "].includes(event.key)) event.preventDefault();
+  if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(event.key) || /^[wasd]$/i.test(event.key)) event.preventDefault();
   if (event.repeat && ["e", "E", "f", "F", "Shift"].includes(event.key)) return;
   if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") keys.left = true;
   if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") keys.right = true;
   if (event.key === "ArrowUp" || event.key === " " || event.key.toLowerCase() === "w") jump();
+  if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") keys.down = true;
   if (event.key.toLowerCase() === "e") useAbility();
   if (event.key.toLowerCase() === "f" || event.key === "Shift") transform();
-  if (order.includes(event.key.toUpperCase())) switchCharacter(event.key.toUpperCase());
   if (["1", "2", "3", "4"].includes(event.key)) switchCharacter(order[Number(event.key) - 1]);
 });
 window.addEventListener("keyup", event => {
   if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") keys.left = false;
   if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") keys.right = false;
+  if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") keys.down = false;
 });
+window.addEventListener("blur", () => Object.assign(keys, { left: false, right: false, down: false }));
 
 document.querySelectorAll("[data-control]").forEach(button => {
   const control = button.dataset.control;
@@ -326,12 +330,13 @@ function update(dt) {
     state.vy *= .992;
   } else {
     state.vy += state.mode === "flight" && state.current !== "A" && keys.jump ? .35 : .72;
+    if (keys.down && !state.grounded) state.vy += 1.1;
     state.vy = Math.min(state.vy, 18);
   }
 
   const previousY = state.y;
   state.x += state.vx;
-  const worldWidth = state.level === "space" ? SPACE_WIDTH : BACKYARD_WIDTH;
+  const worldWidth = state.level === "space" ? SPACE_WIDTH : state.level === "forest" ? FOREST_WIDTH : BACKYARD_WIDTH;
   state.x = Math.max(30, Math.min(worldWidth - 80, state.x));
   state.y += state.vy;
   const wasGrounded = state.grounded;
@@ -363,7 +368,7 @@ function update(dt) {
 
   const body = { x: state.x - 34, y: state.y - 60, w: 68, h: 60 };
   platforms.forEach(platform => {
-    if (state.vy >= 0 && previousY <= platform.y + 4 && collides(body, platform)) {
+    if (state.vy >= 0 && previousY <= platform.y + 4 && collides(body, platform) && (!keys.down || platform.y === GROUND)) {
       state.y = platform.y;
       state.vy = 0;
       state.grounded = true;
@@ -372,7 +377,12 @@ function update(dt) {
 
   if (!wasGrounded && state.grounded) state.landing = .18;
 
-  crates.forEach(crate => {
+  if (state.level === "forest" && state.x >= FOREST_WIDTH - 180) {
+    enterSpaceLevel();
+    return;
+  }
+
+  if (state.level === "backyard") crates.forEach(crate => {
     if (state.smashed.has(crate.id)) return;
     if (collides(body, crate)) {
       if (Math.abs(state.vx) > 12 || (state.ability > 0 && state.current === "A")) {
@@ -384,7 +394,7 @@ function update(dt) {
     }
   });
 
-  sparkData.forEach(spark => {
+  if (state.level === "backyard") sparkData.forEach(spark => {
     if (!state.sparks.has(spark.id) && Math.hypot(state.x - spark.x, (state.y - 35) - spark.y) < 72) {
       state.sparks.add(spark.id);
       say(`${spark.id} spark recovered!`);
@@ -403,7 +413,7 @@ function update(dt) {
     }
   }
 
-  const targetCamera = Math.max(0, Math.min(BACKYARD_WIDTH - canvas.width, state.x - canvas.width * .38));
+  const targetCamera = Math.max(0, Math.min((state.level === "forest" ? FOREST_WIDTH : BACKYARD_WIDTH) - canvas.width, state.x - canvas.width * .38));
   state.camera += (targetCamera - state.camera) * .09;
   updateMotionTrail(dt);
 }
@@ -431,12 +441,29 @@ function enterBackyard() {
   say("Gravity found. Regrettably.");
 }
 
+function enterSpaceLevel() {
+  state.level = "space";
+  state.x = 120;
+  state.y = 400;
+  state.vx = 0;
+  state.vy = 0;
+  state.grounded = false;
+  state.camera = 0;
+  state.elapsed = 0;
+  updateHud();
+  say("The clearing opens into space. Gravity has left the chat.");
+}
+
 function roundedRect(x, y, w, h, r) {
   ctx.beginPath();
   ctx.roundRect(x, y, w, h, r);
 }
 
 function drawBackground() {
+  if (state.level === "forest") {
+    drawForestBackground();
+    return;
+  }
   if (state.level === "space") {
     drawSpaceBackground();
     return;
@@ -470,6 +497,36 @@ function drawBackground() {
   ctx.fillRect(0, 555, canvas.width, 18);
 }
 
+function drawForestBackground() {
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, "#182d31");
+  gradient.addColorStop(.48, "#47715b");
+  gradient.addColorStop(1, "#a0ad71");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  for (let layer = 0; layer < 3; layer++) {
+    const parallax = .12 + layer * .16;
+    const spacing = 210 + layer * 48;
+    for (let i = -2; i < 11; i++) {
+      const x = i * spacing - (state.camera * parallax % spacing);
+      const height = 300 + ((i * 37 + layer * 83 + 9000) % 180);
+      ctx.fillStyle = ["#244c47", "#1d403e", "#183532"][layer];
+      ctx.fillRect(x + spacing * .38, 510 - height, 36 + layer * 8, height + 150);
+      ctx.beginPath();
+      ctx.arc(x + spacing * .42, 510 - height, 76 + layer * 18, 0, Math.PI * 2);
+      ctx.arc(x + spacing * .61, 470 - height, 88 + layer * 18, 0, Math.PI * 2);
+      ctx.arc(x + spacing * .76, 510 - height, 68 + layer * 18, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.fillStyle = "rgba(226,235,174,.14)";
+  for (let i = 0; i < 5; i++) {
+    const x = (i * 350 - state.camera * .08 + 2100) % (canvas.width + 200) - 100;
+    ctx.beginPath();
+    ctx.moveTo(x, 0); ctx.lineTo(x + 90, 0); ctx.lineTo(x + 310, 590); ctx.lineTo(x + 180, 590); ctx.closePath(); ctx.fill();
+  }
+}
+
 function drawSpaceBackground() {
   const gradient = ctx.createRadialGradient(canvas.width * .6, canvas.height * .45, 10, canvas.width * .5, canvas.height * .5, canvas.width);
   gradient.addColorStop(0, "#25376d");
@@ -498,6 +555,10 @@ function drawSpaceBackground() {
 function drawWorld() {
   if (state.level === "space") {
     drawSpaceWorld();
+    return;
+  }
+  if (state.level === "forest") {
+    drawForestWorld();
     return;
   }
   ctx.save();
@@ -549,6 +610,44 @@ function drawWorld() {
   for (let x = 3900; x < 4035; x += 30) ctx.fillRect(x, 590, 15, 60);
   ctx.strokeStyle = "#78513a"; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(3965, 590, 48, Math.PI, 0); ctx.stroke();
 
+  drawPlayer();
+  ctx.restore();
+}
+
+function drawForestWorld() {
+  ctx.save();
+  ctx.translate(-state.camera, 0);
+  ctx.fillStyle = "#263f31";
+  ctx.fillRect(0, GROUND, FOREST_WIDTH, 180);
+  ctx.fillStyle = "#597645";
+  ctx.fillRect(0, GROUND, FOREST_WIDTH, 15);
+  for (let x = 0; x < FOREST_WIDTH; x += 42) {
+    ctx.strokeStyle = x % 84 ? "#91a85f" : "#405f3b";
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(x, GROUND + 4); ctx.quadraticCurveTo(x + 8, GROUND - 13, x + 15, GROUND - 2); ctx.stroke();
+  }
+  platforms.slice(1, 5).forEach((p, index) => {
+    ctx.fillStyle = index % 2 ? "#624d3e" : "#765a42";
+    roundedRect(p.x, p.y, p.w, p.h, 12); ctx.fill();
+    ctx.fillStyle = "#84985a";
+    roundedRect(p.x - 4, p.y - 7, p.w + 8, 12, 8); ctx.fill();
+  });
+  for (let i = 0; i < 14; i++) {
+    const x = 160 + i * 112;
+    const y = 615 - (i % 3) * 40;
+    ctx.fillStyle = i % 2 ? "#f5b4d1" : "#dff4a1";
+    ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 18;
+    ctx.beginPath(); ctx.ellipse(x, y, 7, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+  const portalX = FOREST_WIDTH - 170;
+  ctx.save(); ctx.translate(portalX, GROUND - 92);
+  ctx.shadowColor = "#a2f6d7"; ctx.shadowBlur = 38;
+  ctx.strokeStyle = "rgba(162,246,215,.92)"; ctx.lineWidth = 13;
+  ctx.beginPath(); ctx.ellipse(0, 0, 56, 88, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.shadowBlur = 0; ctx.strokeStyle = "rgba(226,255,220,.74)"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.ellipse(0, 0, 40, 70, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
   drawPlayer();
   ctx.restore();
 }
@@ -616,7 +715,7 @@ function drawPlayer() {
     w = humanWidths[state.current];
     h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / 4)) : w * (img.naturalHeight / img.naturalWidth);
   }
-  if (state.current === "A" && state.mode === "flight") { w = 205; h = w * (img.naturalHeight / img.naturalWidth); }
+  if (state.current === "A" && state.mode === "flight") { w = 205; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
   if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / img.naturalWidth); }
   const motion = creatureMotion();
   if (runningHuman || movingAnimal) {
@@ -709,6 +808,10 @@ function creatureMotion() {
     motion.scaleY -= squash;
     motion.y += squash * 28;
   }
+  if (keys.down && state.grounded) {
+    motion.scaleY = .84;
+    motion.y += 12;
+  }
   return motion;
 }
 
@@ -747,9 +850,9 @@ function drawHelp() {
   ctx.save();
   ctx.globalAlpha = Math.min(1, (8 - state.elapsed) / 1.5);
   ctx.fillStyle = "rgba(10,14,27,.82)";
-  roundedRect(22, 22, 465, 72, 18); ctx.fill();
-  ctx.fillStyle = "#fff"; ctx.font = "800 18px system-ui"; ctx.fillText("Move: A/D or arrows   Jump: Space", 42, 51);
-  ctx.fillStyle = "#d3d7e2"; ctx.font = "700 15px system-ui"; ctx.fillText("Ability: E   Transform: F/Shift   Switch: 1–4", 42, 78);
+  roundedRect(22, 22, 520, 72, 18); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.font = "800 18px system-ui"; ctx.fillText("Move: A/D or ←/→   Jump: W/Space", 42, 51);
+  ctx.fillStyle = "#d3d7e2"; ctx.font = "700 15px system-ui"; ctx.fillText("Down: S   Ability: E   Transform: F   Switch: 1–4", 42, 78);
   ctx.restore();
 }
 
