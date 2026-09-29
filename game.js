@@ -4,34 +4,34 @@ const PEOPLE = {
   C: {
     age: "Teenager",
     accent: "#aa78ef",
-    art: { human: "assets/forms/c-human.webp", run: "assets/forms/c-human-run.webp", flight: "assets/forms/c-flight.webp", chaos: "assets/forms/c-chaos.webp" },
-    human: { animal: "C", ability: "Improvised vault", description: "Find the shortcut by confidently making one up." },
+    art: { human: "assets/forms/c-human.webp", run: "assets/forms/c-human-run.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
+    human: { animal: "Human", ability: "Improvised vault", description: "Find the shortcut by confidently making one up." },
     flight: { animal: "Flamingo", ability: "Stilt vault", description: "Balance, wade, and vault with unnecessary elegance." },
     chaos: { animal: "Red fox", ability: "Burrow dash", description: "Dig shortcuts and outfox objects with no brain." }
   },
   A: {
     age: "Adult",
     accent: "#d84c59",
-    art: { human: "assets/forms/a-human.webp", run: "assets/forms/a-human-run.webp", flight: "assets/forms/a-flight.webp", chaos: "assets/forms/a-chaos.webp" },
-    human: { animal: "A", ability: "Protective force", description: "Remove an obstacle from everyone else's problem list." },
-    flight: { animal: "Cassowary", ability: "Airborne violence", description: "Technically flight. Legally an incident." },
-    chaos: { animal: "Giant black snake", ability: "Constrict", description: "Crush barriers and move with terrifying purpose." }
+    art: { human: "assets/forms/a-human.webp", run: "assets/forms/a-human-run.webp", flight: "assets/forms/a-flight.webp", flightRun: "assets/forms/a-flight-run.webp", chaos: "assets/forms/a-chaos.webp" },
+    human: { animal: "Human", ability: "Protective force", description: "Remove an obstacle from everyone else's problem list." },
+    flight: { animal: "Peacock", ability: "Dramatic charge", description: "Turn every entrance into a loud, feathery announcement." },
+    chaos: { animal: "Giant black wolf", ability: "Pack-force smash", description: "Clear a path with enormous, protective wolf energy." }
   },
   S: {
     age: "Adult",
     accent: "#91a99b",
-    art: { human: "assets/forms/s-human.webp", run: "assets/forms/s-human-run.webp", flight: "assets/forms/s-flight.webp", chaos: "assets/forms/s-chaos.webp" },
-    human: { animal: "S", ability: "Rapid plan", description: "Think three moves ahead, then run there immediately." },
+    art: { human: "assets/forms/s-human.webp", run: "assets/forms/s-human-run.webp", flight: "assets/forms/s-flight.webp", flightRun: "assets/forms/s-flight-run.webp", chaos: "assets/forms/s-chaos.webp", chaosRun: "assets/forms/s-chaos-run.webp" },
+    human: { animal: "Human", ability: "Rapid plan", description: "Think three moves ahead, then run there immediately." },
     flight: { animal: "Crow", ability: "Bright idea", description: "Glide, scout, and attract useful shiny things." },
-    chaos: { animal: "Cheetah", ability: "Fast brain", description: "Move so quickly the rest of reality needs a minute." }
+    chaos: { animal: "Slim black panther", ability: "Silent pounce", description: "Slip out of sight, then reappear exactly where useful." }
   },
   E: {
     age: "Preteen",
     accent: "#20c9c3",
-    art: { human: "assets/forms/e-human.webp", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-flight.webp", chaos: "assets/forms/e-chaos.webp" },
-    human: { animal: "E", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
+    art: { human: "assets/forms/e-human.webp", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-flight.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
+    human: { animal: "Human", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
     flight: { animal: "Great horned owl", ability: "Night sight", description: "Reveal secrets and move without announcing it." },
-    chaos: { animal: "Raccoon", ability: "Rummage", description: "Open containers and convert garbage into progress." }
+    chaos: { animal: "Cheetah", ability: "Fast as heck", description: "Turn a tiny opening into a full-speed blur." }
   }
 };
 
@@ -72,7 +72,8 @@ document.querySelectorAll(".form-choice").forEach(button => button.addEventListe
 
 for (const [id, p] of Object.entries(PEOPLE)) {
   images[id] = {};
-  for (const mode of [...modes, "run"]) {
+  for (const mode of [...modes, "run", "flightRun", "chaosRun"]) {
+    if (!p.art[mode]) continue;
     const img = new Image();
     img.src = p.art[mode];
     images[id][mode] = img;
@@ -602,10 +603,14 @@ function drawSpaceWorld() {
 
 function drawPlayer() {
   const runningHuman = state.mode === "human" && state.level !== "space" && (Math.abs(state.vx) > .45 || !state.grounded);
-  const img = runningHuman ? images[state.current].run : images[state.current][state.mode];
+  const runKey = `${state.mode}Run`;
+  const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) &&
+    (state.mode === "flight" || Math.abs(state.vx) > .45 || !state.grounded);
+  const img = runningHuman ? images[state.current].run : movingAnimal ? images[state.current][runKey] : images[state.current][state.mode];
   if (!img.complete || !img.naturalWidth) return;
   let w = state.mode === "human" ? 150 : state.mode === "flight" ? 230 : 245;
-  let h = w * (img.naturalHeight / img.naturalWidth);
+  const frameCount = runningHuman || movingAnimal ? 4 : 1;
+  let h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
   if (state.mode === "human") {
     const humanWidths = { C: 155, A: 145, S: 142, E: 148 };
     w = humanWidths[state.current];
@@ -614,10 +619,11 @@ function drawPlayer() {
   if (state.current === "A" && state.mode === "flight") { w = 205; h = w * (img.naturalHeight / img.naturalWidth); }
   if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / img.naturalWidth); }
   const motion = creatureMotion();
-  if (runningHuman) {
-    motion.frameIndex = state.grounded ? Math.floor(state.motionPhase * .9) % 4 : 3;
+  if (runningHuman || movingAnimal) {
+    motion.frameIndex = !state.grounded && state.mode !== "flight" ? 3 : Math.floor(state.motionPhase * (state.mode === "flight" ? 1.5 : .9)) % 4;
     motion.frameCount = 4;
   }
+  if (state.current === "E" && state.mode === "flight") motion.wave = 5;
 
   if (state.level !== "space") {
     ctx.save();

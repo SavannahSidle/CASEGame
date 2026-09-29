@@ -7,9 +7,11 @@ A silly, easy browser adventure for four people with human, flight, and chaos fo
 | Character | Human ability | Flight form | Chaos form |
 |---|---|---|---|
 | C | Improvised vault | Flamingo | Red fox |
-| A | Protective force | Cassowary | Giant black snake |
-| S | Rapid plan | Crow | Cheetah |
-| E | Quick thinking | Great horned owl | Raccoon |
+| A | Protective force | Peacock | Giant black wolf |
+| S | Rapid plan | Crow | Slim black panther |
+| E | Quick thinking | Great horned owl | Cheetah |
+
+The game opens in human form. Character art includes separate walk/run cycles for human and animal forms; birds use wingbeat cycles, while the owl's wings are animated procedurally.
 
 Aquatic forms and additional animal groups are intentionally reserved for much later unlock systems.
 
