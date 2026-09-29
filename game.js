@@ -719,7 +719,7 @@ function drawPlayer() {
   if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / img.naturalWidth); }
   const motion = creatureMotion();
   if (runningHuman || movingAnimal) {
-    motion.frameIndex = !state.grounded && state.mode !== "flight" ? 3 : Math.floor(state.motionPhase * (state.mode === "flight" ? 1.5 : .9)) % 4;
+    motion.frameIndex = !state.grounded && state.mode !== "flight" ? 3 : (state.motionPhase * (state.mode === "flight" ? 1.5 : .9)) % 4;
     motion.frameCount = 4;
   }
   if (state.current === "E" && state.mode === "flight") motion.wave = 5;
@@ -827,10 +827,22 @@ function drawCreature(img, w, h, motion) {
     ctx.shadowBlur = 28;
   }
 
-  if (Number.isInteger(motion.frameIndex)) {
+  if (state.current === "E" && state.mode === "human" && !motion.ghost) drawLongHair(w, h);
+
+  if (Number.isFinite(motion.frameIndex)) {
     const frameCount = motion.frameCount || 1;
     const sourceW = img.naturalWidth / frameCount;
-    ctx.drawImage(img, motion.frameIndex * sourceW, 0, sourceW, img.naturalHeight, -w * .5, -h * .78, w, h);
+    const framePosition = ((motion.frameIndex % frameCount) + frameCount) % frameCount;
+    const firstFrame = Math.floor(framePosition);
+    const blend = (framePosition - firstFrame) ** 2 * (3 - 2 * (framePosition - firstFrame));
+    const baseAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = baseAlpha * (1 - blend);
+    ctx.drawImage(img, firstFrame * sourceW, 0, sourceW, img.naturalHeight, -w * .5, -h * .78, w, h);
+    if (blend > .001) {
+      ctx.globalAlpha = baseAlpha * blend;
+      ctx.drawImage(img, ((firstFrame + 1) % frameCount) * sourceW, 0, sourceW, img.naturalHeight, -w * .5, -h * .78, w, h);
+    }
+    ctx.globalAlpha = baseAlpha;
   } else if (motion.wave && !motion.ghost) {
     const strips = 14;
     const sourceW = img.naturalWidth / strips;
@@ -841,6 +853,33 @@ function drawCreature(img, w, h, motion) {
     }
   } else {
     ctx.drawImage(img, -w * .5, -h * .78, w, h);
+  }
+  ctx.restore();
+}
+
+function drawLongHair(w, h) {
+  const sway = Math.sin(state.motionPhase * .78) * w * .025;
+  const fill = ctx.createLinearGradient(-w * .3, -h * .78, w * .12, -h * .42);
+  fill.addColorStop(0, "#090d16");
+  fill.addColorStop(.55, "#171c28");
+  fill.addColorStop(1, "#272e3b");
+  ctx.save();
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(w * .12, -h * .83);
+  ctx.bezierCurveTo(-w * .02, -h * .88, -w * .14, -h * .81, -w * .19 + sway, -h * .70);
+  ctx.bezierCurveTo(-w * .23 + sway, -h * .58, -w * .34 + sway, -h * .49, -w * .28 + sway, -h * .37);
+  ctx.bezierCurveTo(-w * .21 + sway, -h * .45, -w * .15 + sway, -h * .51, -w * .09, -h * .62);
+  ctx.bezierCurveTo(-w * .01, -h * .73, w * .05, -h * .74, w * .12, -h * .83);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = "rgba(126,143,164,.58)";
+  ctx.lineWidth = Math.max(1, w * .012);
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(w * (.04 - i * .035), -h * (.77 - i * .02));
+    ctx.bezierCurveTo(-w * .10 + sway, -h * .68, -w * .27 + sway, -h * .55, -w * (.23 + i * .025) + sway, -h * (.41 + i * .025));
+    ctx.stroke();
   }
   ctx.restore();
 }
