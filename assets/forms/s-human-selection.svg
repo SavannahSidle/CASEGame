@@ -36,6 +36,6 @@
   <path d="M169 228 Q207 243 248 225 M163 339 Q208 352 260 337" fill="none" stroke="#4b4f53" stroke-width="3" opacity=".7"/>
   <!-- Face and original flowing hair preserve S's likeness. -->
   <svg x="59" y="5" width="292" height="254" viewBox="70 0 410 355" overflow="hidden" clip-path="url(#headCrop)">
-    <image href="s-human.webp" x="0" y="0" width="543" height="724"/>
+    <image href="s-human.webp" x="-70" y="0" width="543" height="724"/>
   </svg>
 </svg>
