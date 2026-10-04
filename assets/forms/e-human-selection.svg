@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="E standing in a teal hoodie, with shoulder-length dark hair">
+  <defs>
+    <linearGradient id="hoodie" x2="1" y2="1"><stop stop-color="#35ddd2"/><stop offset=".42" stop-color="#14b8b3"/><stop offset="1" stop-color="#087d87"/></linearGradient>
+    <linearGradient id="pants" x2="1"><stop stop-color="#25324a"/><stop offset=".5" stop-color="#172238"/><stop offset="1" stop-color="#101a2d"/></linearGradient>
+    <linearGradient id="hair" x2="1"><stop stop-color="#10131b"/><stop offset=".52" stop-color="#28303a"/><stop offset="1" stop-color="#111722"/></linearGradient>
+    <linearGradient id="skin" x2="1"><stop stop-color="#a95f3e"/><stop offset=".45" stop-color="#cb8159"/><stop offset="1" stop-color="#e6a078"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-20%" width="160%" height="150%"><feGaussianBlur stdDeviation="9"/></filter>
+    <clipPath id="headCrop" clipPathUnits="userSpaceOnUse"><rect width="282" height="210" rx="2"/></clipPath>
+  </defs>
+  <ellipse cx="207" cy="558" rx="112" ry="17" fill="#000" opacity=".27" filter="url(#shadow)"/>
+  <!-- Back curls fall to the shoulders and just below them. -->
+  <path d="M118 82 Q94 110 106 154 Q80 184 100 217 Q82 250 111 279 Q105 297 126 303 Q145 315 157 285 Q169 302 185 279 Q201 302 215 276 Q234 296 249 268 Q273 249 257 219 Q279 188 256 158 Q270 122 249 92 Q253 56 226 29Z" fill="url(#hair)" stroke="#080d16" stroke-width="5"/>
+  <g fill="none" stroke-linecap="round" opacity=".8">
+    <path d="M119 117 Q96 165 119 205 Q100 253 135 285" stroke="#4a515a" stroke-width="5"/>
+    <path d="M137 102 Q119 153 143 193 Q124 245 157 292" stroke="#202936" stroke-width="7"/>
+    <path d="M222 104 Q246 155 228 204 Q249 247 226 282" stroke="#505760" stroke-width="4"/>
+    <path d="M238 143 Q258 184 239 226 Q260 266 236 274" stroke="#1b2532" stroke-width="6"/>
+  </g>
+  <!-- Standing legs, with the familiar joggers and teal trainers. -->
+  <path d="M154 360 Q192 350 222 361 L214 448 Q210 478 207 510 L169 509 Q169 479 171 450 L164 411Z" fill="url(#pants)" stroke="#101827" stroke-width="5"/>
+  <path d="M218 359 Q251 355 273 371 L266 439 Q263 476 278 511 L239 516 Q220 482 228 447 L208 410Z" fill="url(#pants)" stroke="#101827" stroke-width="5"/>
+  <path d="M167 428 Q190 438 214 430 M224 427 Q247 438 267 426" fill="none" stroke="#526077" stroke-width="3" opacity=".55"/>
+  <path d="M168 495 Q188 505 209 497 L207 526 L164 526Z M239 496 Q257 504 279 496 L291 524 L239 527Z" fill="#111d31"/>
+  <path d="M158 518 Q182 510 212 522 L219 542 Q206 551 158 545 Q148 538 158 518Z" fill="#18b9b6" stroke="#d4f5ef" stroke-width="4"/>
+  <path d="M235 517 Q260 509 292 522 L307 541 Q299 552 245 545 Q231 539 235 517Z" fill="#18b9b6" stroke="#d4f5ef" stroke-width="4"/>
+  <path d="M169 525 L205 535 M250 524 L286 536" stroke="#f5ffff" stroke-width="3" opacity=".9"/>
+  <!-- Neck and relaxed arms. -->
+  <path d="M184 161 Q207 150 228 165 L232 211 L188 216Z" fill="url(#skin)" stroke="#8d4f39" stroke-width="3"/>
+  <path d="M153 206 Q132 215 126 246 L117 317 Q116 337 132 342 Q148 344 153 324 L171 269 L181 241Z" fill="url(#skin)" stroke="#8d4f39" stroke-width="4"/>
+  <path d="M256 210 Q278 221 280 250 L285 312 Q284 332 268 336 Q252 336 250 316 L242 264 L231 240Z" fill="url(#skin)" stroke="#8d4f39" stroke-width="4"/>
+  <path d="M119 316 Q111 333 122 344 Q134 353 145 342 L151 327Z M252 315 Q249 331 261 340 Q275 347 286 334 L282 317Z" fill="url(#skin)" stroke="#8d4f39" stroke-width="3"/>
+  <!-- Hoodie body and sleeves. -->
+  <path d="M163 198 Q181 184 196 186 L217 203 Q237 188 255 205 L279 232 L263 252 L254 238 L263 344 Q218 367 154 350 L165 252 L146 270 L128 250 L148 216Z" fill="url(#hoodie)" stroke="#087b83" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M195 199 L215 209 L230 345 M169 216 Q185 228 196 246 M248 218 Q237 230 229 246" fill="none" stroke="#8bf4e9" stroke-width="4" opacity=".74"/>
+  <path d="M209 210 L204 348" stroke="#d4fff6" stroke-width="3" opacity=".9"/>
+  <path d="M161 343 Q208 357 259 340 L258 365 Q209 381 157 363Z" fill="#087f88"/>
+  <path d="M151 246 L135 313 M263 244 L273 312" stroke="#38d8ce" stroke-width="5" opacity=".7"/>
+  <!-- Head detail is sampled from E's existing portrait; the crop leaves out the running body. -->
+  <svg x="68" y="0" width="282" height="210" viewBox="500 0 470 350" overflow="hidden" clip-path="url(#headCrop)">
+    <image href="e-human.webp" x="0" y="0" width="1151" height="1366"/>
+  </svg>
+  <!-- Keep the new lower curls visible beside the hoodie shoulders. -->
+  <path d="M117 164 Q104 206 120 238 Q107 270 126 296 Q131 308 140 307 M252 170 Q268 207 252 237 Q270 263 253 291" fill="none" stroke="#222a35" stroke-width="12" stroke-linecap="round"/>
+  <path d="M119 180 Q111 218 128 246 M255 186 Q264 219 250 248" fill="none" stroke="#59616b" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+</svg>

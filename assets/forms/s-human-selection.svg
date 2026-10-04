@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="S standing in a black tank top, leggings, and mukluks">
+  <defs>
+    <linearGradient id="leggings" x2="1"><stop stop-color="#26282c"/><stop offset=".45" stop-color="#101216"/><stop offset="1" stop-color="#303238"/></linearGradient>
+    <linearGradient id="tank" x2="1" y2="1"><stop stop-color="#262a2c"/><stop offset=".5" stop-color="#111315"/><stop offset="1" stop-color="#33363a"/></linearGradient>
+    <linearGradient id="skin" x2="1"><stop stop-color="#efc6a9"/><stop offset=".5" stop-color="#f6d8c1"/><stop offset="1" stop-color="#dcae91"/></linearGradient>
+    <linearGradient id="boot" x2="1"><stop stop-color="#574c44"/><stop offset=".5" stop-color="#302b28"/><stop offset="1" stop-color="#65584e"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-20%" width="160%" height="150%"><feGaussianBlur stdDeviation="9"/></filter>
+    <clipPath id="headCrop" clipPathUnits="userSpaceOnUse"><rect width="292" height="254"/></clipPath>
+  </defs>
+  <ellipse cx="205" cy="559" rx="112" ry="17" fill="#000" opacity=".27" filter="url(#shadow)"/>
+  <!-- Hair silhouette and loose curls sweep behind the shoulders. -->
+  <path d="M82 74 Q98 30 160 36 Q199 15 245 47 Q288 58 305 101 Q316 140 288 167 Q278 206 246 222 L126 209 Q94 182 102 151 Q71 125 82 74Z" fill="#3d2924" stroke="#201614" stroke-width="5"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M100 76 Q83 118 116 145 Q97 174 129 201" stroke="#68463a" stroke-width="6"/>
+    <path d="M125 50 Q105 100 142 139 Q122 174 151 212" stroke="#795343" stroke-width="4"/>
+    <path d="M264 70 Q293 114 263 148 Q285 179 250 209" stroke="#735041" stroke-width="5"/>
+    <path d="M150 42 Q137 82 176 111" stroke="#946955" stroke-width="4"/>
+  </g>
+  <!-- Straight stance and mukluk boots. -->
+  <path d="M151 354 Q181 344 208 357 L204 438 L197 505 L160 506 L160 437Z" fill="url(#leggings)" stroke="#111316" stroke-width="5"/>
+  <path d="M208 356 Q239 348 264 364 L257 439 L267 506 L230 509 L217 440Z" fill="url(#leggings)" stroke="#111316" stroke-width="5"/>
+  <path d="M157 419 Q179 430 204 419 M218 421 Q239 431 261 420" fill="none" stroke="#53565a" stroke-width="3" opacity=".65"/>
+  <path d="M160 484 Q180 491 200 482 L201 509 L156 516Z M231 485 Q248 493 267 484 L275 513 L232 518Z" fill="#2c2622"/>
+  <path d="M155 503 Q175 496 204 506 L211 551 Q198 558 151 552 L145 539Z M230 505 Q251 497 276 508 L289 541 Q279 557 232 552Z" fill="url(#boot)" stroke="#201c19" stroke-width="5"/>
+  <path d="M153 514 Q179 523 207 513 M234 515 Q260 523 282 514" fill="none" stroke="#8a786a" stroke-width="8"/>
+  <path d="M146 545 Q176 553 209 545 M230 546 Q260 554 290 544" fill="none" stroke="#171717" stroke-width="7"/>
+  <path d="M164 523 L166 541 M190 523 L191 541 M245 523 L247 541 M269 523 L270 541" stroke="#a99a8b" stroke-width="2"/>
+  <!-- Neck and relaxed hands at her sides. -->
+  <path d="M190 155 Q211 151 230 165 L232 207 L190 211Z" fill="url(#skin)" stroke="#c49376" stroke-width="3"/>
+  <path d="M157 202 Q137 213 131 243 L123 311 Q123 331 138 336 Q153 336 157 318 L175 267 L186 238Z" fill="url(#skin)" stroke="#ce9d80" stroke-width="4"/>
+  <path d="M256 206 Q276 218 278 245 L282 312 Q281 331 265 335 Q251 333 250 315 L243 265 L232 239Z" fill="url(#skin)" stroke="#ce9d80" stroke-width="4"/>
+  <path d="M125 310 Q119 328 132 339 Q145 345 156 331 L156 315Z M250 311 Q247 328 260 338 Q274 345 284 330 L281 312Z" fill="url(#skin)" stroke="#ce9d80" stroke-width="3"/>
+  <!-- Black tank, neat straps, waistband, and leggings. -->
+  <path d="M164 195 Q179 183 194 186 L205 203 L220 187 Q238 189 253 203 L273 236 L258 253 L250 239 L263 351 Q214 368 154 352 L167 244 L155 258 L140 244Z" fill="url(#tank)" stroke="#101214" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M183 190 L190 215 M222 190 L216 215" stroke="#55595d" stroke-width="5"/>
+  <path d="M169 228 Q207 243 248 225 M163 339 Q208 352 260 337" fill="none" stroke="#4b4f53" stroke-width="3" opacity=".7"/>
+  <!-- Face and original flowing hair preserve S's likeness. -->
+  <svg x="59" y="5" width="292" height="254" viewBox="70 0 410 355" overflow="hidden" clip-path="url(#headCrop)">
+    <image href="s-human.webp" x="0" y="0" width="543" height="724"/>
+  </svg>
+</svg>
