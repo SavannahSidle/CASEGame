@@ -78,6 +78,11 @@ button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .card-initial { display: grid; place-items: center; width: 43px; aspect-ratio: 1; border-radius: 14px; color: #0d1020; background: var(--accent); font-size: 1.35rem; font-weight: 950; }
 .card-age { color: var(--muted); font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
 .form-art { position: absolute; inset: 55px 5% 83px; background-image: var(--human-image); background-repeat: no-repeat; background-size: contain; background-position: center; filter: drop-shadow(0 18px 12px rgba(0,0,0,.36)); transition: opacity .2s, transform .5s; }
+/* Keep the raven's scarf red on the selection card as well as in the game canvas. */
+.character-card.flight[data-id="A"] .form-art::before,
+.character-card.flight[data-id="A"] .form-art::after { content: ""; position: absolute; z-index: 1; background: #d9273f; filter: drop-shadow(0 2px 2px rgba(0,0,0,.38)); pointer-events: none; }
+.character-card.flight[data-id="A"] .form-art::before { left: 61%; top: 61%; width: 19%; height: 6%; border-radius: 45% 30% 40% 35%; transform: rotate(22deg); clip-path: polygon(0 22%, 100% 0, 91% 100%, 14% 82%); }
+.character-card.flight[data-id="A"] .form-art::after { left: 70%; top: 65%; width: 7%; height: 17%; border-radius: 45% 35% 52% 38%; transform: rotate(-7deg); clip-path: polygon(0 0, 100% 5%, 82% 100%, 20% 79%); }
 .character-card.flight .form-art { background-image: var(--flight-image); }
 .character-card.chaos .form-art { background-image: var(--chaos-image); transform: scale(1.02); }
 .character-card.flight[data-id="A"] .form-art { transform: scale(1.28); }
