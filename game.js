@@ -36,13 +36,56 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261004-2";
+const ART_REVISION = "case-20261004-9";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
 const images = {};
 const modes = ["human", "flight", "chaos"];
 let selectedMode = "human";
+
+const ANIMATION_FRAMES = {
+  // Skip the owl sheet's front-facing outlier; the repeated downstroke gives it a calm glide.
+  "E:flight": [0, 1, 3, 1]
+};
+const WALK_CYCLE = [0, 1, 2, 3];
+const frameBoxes = new WeakMap();
+
+function getAlphaBoxes(img, count = 1) {
+  if (!img?.complete || !img.naturalWidth || !img.naturalHeight) return [];
+  const cached = frameBoxes.get(img);
+  if (cached?.count === count) return cached.boxes;
+  const canvas = document.createElement("canvas");
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  const scan = canvas.getContext("2d", { willReadFrequently: true });
+  scan.drawImage(img, 0, 0);
+  let pixels;
+  try { pixels = scan.getImageData(0, 0, canvas.width, canvas.height).data; }
+  catch { return []; }
+  const cellW = canvas.width / count;
+  const boxes = Array.from({ length: count }, () => ({ x: Infinity, y: Infinity, right: -Infinity, bottom: -Infinity }));
+  for (let y = 0; y < canvas.height; y++) {
+    for (let x = 0; x < canvas.width; x++) {
+      if (pixels[(y * canvas.width + x) * 4 + 3] < 20) continue;
+      const box = boxes[Math.min(count - 1, Math.floor(x / cellW))];
+      const localX = x % cellW;
+      box.x = Math.min(box.x, localX);
+      box.y = Math.min(box.y, y);
+      box.right = Math.max(box.right, localX + 1);
+      box.bottom = Math.max(box.bottom, y + 1);
+    }
+  }
+  const result = boxes.map(box => {
+    if (!Number.isFinite(box.x)) return null;
+    const pad = 3;
+    const x = Math.max(0, Math.floor(box.x) - pad);
+    const y = Math.max(0, Math.floor(box.y) - pad);
+    return { x, y, width: Math.min(cellW - x, Math.ceil(box.right) + pad - x), height: Math.min(canvas.height - y, Math.ceil(box.bottom) + pad - y) };
+  });
+  frameBoxes.set(img, { count, boxes: result });
+  return result;
+}
 
 const roster = document.querySelector("#roster");
 const dock = document.querySelector("#character-dock");
@@ -107,6 +150,7 @@ const state = {
   bite: 0,
   peacockTimer: 0,
   peacockHudTick: 0,
+  snowyOwlTimer: 0,
   elapsed: 0,
   finished: false,
   level: "space",
@@ -153,7 +197,7 @@ const crates = [
 ];
 
 function resetGame() {
-  Object.assign(state, { running: true, current: "C", mode: selectedMode, x: 120, y: GROUND, vx: 0, vy: 0, grounded: true, facing: 1, camera: 0, reveal: 0, ability: 0, bite: 0, peacockTimer: 0, peacockHudTick: 0, elapsed: 0, finished: false, level: "forest", motionPhase: 0, transformFlash: 0, landing: 0, trail: [], trailClock: 0 });
+  Object.assign(state, { running: true, current: "C", mode: selectedMode, x: 120, y: GROUND, vx: 0, vy: 0, grounded: true, facing: 1, camera: 0, reveal: 0, ability: 0, bite: 0, peacockTimer: 0, peacockHudTick: 0, snowyOwlTimer: 0, elapsed: 0, finished: false, level: "forest", motionPhase: 0, transformFlash: 0, landing: 0, trail: [], trailClock: 0 });
   state.sparks.clear();
   state.spaceSparks.clear();
   state.smashed.clear();
@@ -181,7 +225,10 @@ function buildDock() {
   dock.innerHTML = order.map(id => {
     const form = PEOPLE[id][state.mode];
     const specialPeacock = id === "A" && state.mode === "flight" && state.peacockTimer > 0;
-    return `<button class="dock-character" data-id="${id}" type="button"><b>${id}</b><span><strong>${specialPeacock ? "Peacock" : form.animal}</strong><small>${specialPeacock ? `${state.peacockTimer.toFixed(1)}s show-off` : form.ability}</small></span></button>`;
+    const snowyOwl = id === "E" && state.mode === "flight" && state.snowyOwlTimer > 0;
+    const specialName = specialPeacock ? "Peacock" : snowyOwl ? "Snowy owl" : form.animal;
+    const specialDetail = specialPeacock ? `${state.peacockTimer.toFixed(1)}s show-off` : snowyOwl ? `${state.snowyOwlTimer.toFixed(1)}s snow-glide` : form.ability;
+    return `<button class="dock-character" data-id="${id}" type="button"><b>${id}</b><span><strong>${specialName}</strong><small>${specialDetail}</small></span></button>`;
   }).join("");
   dock.querySelectorAll("button").forEach(button => button.addEventListener("click", () => switchCharacter(button.dataset.id)));
 }
@@ -206,7 +253,9 @@ function transform() {
 }
 
 function animalNameFor(id) {
-  return id === "A" && state.mode === "flight" && state.peacockTimer > 0 ? "Peacock" : PEOPLE[id][state.mode].animal;
+  if (id === "A" && state.mode === "flight" && state.peacockTimer > 0) return "Peacock";
+  if (id === "E" && state.mode === "flight" && state.snowyOwlTimer > 0) return "Snowy owl";
+  return PEOPLE[id][state.mode].animal;
 }
 
 function updateHud() {
@@ -219,7 +268,9 @@ function updateHud() {
   const formName = state.mode[0].toUpperCase() + state.mode.slice(1);
   const abilityLabel = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0
     ? `Peacock form · ${state.peacockTimer.toFixed(1)}s remaining`
-    : f.ability;
+    : state.current === "E" && state.mode === "flight" && state.snowyOwlTimer > 0
+      ? `Snowy owl · ${state.snowyOwlTimer.toFixed(1)}s remaining`
+      : f.ability;
   document.querySelector("#active-form").textContent = `${formName} form · ${abilityLabel}`;
   const count = state.level === "space" ? state.spaceSparks.size : state.sparks.size;
   document.querySelector("#case-count").textContent = state.level === "forest" ? "→" : `${count} / 4`;
@@ -268,6 +319,11 @@ function useSpecial() {
     state.ability = .75;
     smashNearby(210);
     say("Pack-force smash!");
+  } else if (state.current === "E" && state.mode === "flight") {
+    state.snowyOwlTimer = 5;
+    state.transformFlash = .38;
+    updateHud();
+    say("Snowy owl! Five seconds of silent snow-gliding.");
   }
 }
 
@@ -351,6 +407,11 @@ function update(dt) {
     state.peacockTimer = Math.max(0, state.peacockTimer - dt);
     const nextTick = Math.ceil(state.peacockTimer * 10);
     if (priorTick !== nextTick) updateHud();
+  }
+  if (state.snowyOwlTimer > 0) {
+    const priorTick = Math.ceil(state.snowyOwlTimer * 10);
+    state.snowyOwlTimer = Math.max(0, state.snowyOwlTimer - dt);
+    if (priorTick !== Math.ceil(state.snowyOwlTimer * 10)) updateHud();
   }
   state.reveal = Math.max(0, state.reveal - dt);
   state.transformFlash = Math.max(0, state.transformFlash - dt);
@@ -749,12 +810,15 @@ function drawPlayer() {
   const runKey = `${state.mode}Run`;
   const peacock = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0;
   const animalMoving = Math.abs(state.vx) > .45 || !state.grounded;
-  const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && animalMoving;
+  const flying = state.mode === "flight" && !state.grounded;
+  const ravenWalking = state.mode === "flight" && state.current === "A" && state.grounded && Math.abs(state.vx) > .45;
+  const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && (state.mode === "flight" ? flying || ravenWalking : animalMoving);
   const biteImage = state.current === "A" && state.mode === "chaos" && state.bite > 0;
+  const runSheet = runningHuman || movingAnimal || (peacock && flying);
   const img = biteImage
     ? images.A.bite
     : peacock
-      ? (animalMoving && images.A.peacockRun ? images.A.peacockRun : images.A.peacock)
+      ? (flying && images.A.peacockRun ? images.A.peacockRun : images.A.peacock)
       : runningHuman
         ? images[state.current].run
         : movingAnimal
@@ -762,7 +826,7 @@ function drawPlayer() {
           : images[state.current][state.mode];
   if (!img.complete || !img.naturalWidth) return;
   let w = state.mode === "human" ? 150 : state.mode === "flight" ? 230 : 245;
-  const frameCount = !biteImage && (runningHuman || movingAnimal || (peacock && animalMoving)) ? 4 : 1;
+  const frameCount = !biteImage && runSheet ? 4 : 1;
   let h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
   if (state.mode === "human") {
     const humanWidths = { C: 155, A: 145, S: 142, E: 148 };
@@ -772,10 +836,16 @@ function drawPlayer() {
   if (state.current === "A" && state.mode === "flight") { w = peacock ? 230 : 260; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
   if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
   const motion = creatureMotion();
-  if (!biteImage && (runningHuman || movingAnimal || (peacock && animalMoving))) {
-    motion.frameIndex = !state.grounded && state.mode !== "flight" ? 3 : (state.motionPhase * (state.mode === "flight" ? 1.5 : .9)) % 4;
+  if (!biteImage && runSheet) {
+    const cycle = ANIMATION_FRAMES[`${state.current}:${state.mode}`] || WALK_CYCLE;
+    const rate = state.current === "E" && state.mode === "flight" ? .43 : state.mode === "flight" ? .72 : state.current === "A" && state.mode === "chaos" ? 1.16 : 1.02;
+    motion.frameIndex = (state.motionPhase * rate) % cycle.length;
+    motion.frameSequence = cycle;
     motion.frameCount = 4;
   }
+  motion.snowyOwl = state.current === "E" && state.mode === "flight" && state.snowyOwlTimer > 0;
+  motion.ravenScarf = state.current === "A" && state.mode === "flight" && !peacock;
+  motion.frameBase = images[state.current][state.mode];
 
   if (state.level !== "space") {
     ctx.save();
@@ -831,14 +901,32 @@ function creatureMotion() {
   }
 
   if (state.mode === "flight") {
-    if (Math.abs(state.vx) > .45 || !state.grounded) {
-      const wingbeat = Math.sin(phase * 1.35);
-      if (state.grounded) motion.y -= Math.abs(Math.sin(phase * 2.1)) * (state.current === "C" || state.current === "A" ? 9 : 4);
-      else motion.y += wingbeat * 3.5;
-      motion.rotation = Math.max(-.16, Math.min(.16, state.vy * .014)) + Math.sin(phase * .45) * .012;
-      motion.scaleY = 1 + wingbeat * .024;
-      motion.scaleX = 1 - wingbeat * .012;
-      motion.shadowScale = state.grounded ? 1 : .62;
+    if (!state.grounded) {
+      const wingbeat = Math.sin(phase * (state.current === "E" ? .88 : 1.12));
+      motion.y += wingbeat * (state.current === "E" ? 2.2 : 3.3);
+      motion.rotation = Math.max(-.09, Math.min(.09, state.vy * .008)) + Math.sin(phase * .28) * .008;
+      motion.scaleY = 1 + wingbeat * .012;
+      motion.scaleX = 1 - wingbeat * .006;
+      motion.shadowScale = .62;
+    } else if (Math.abs(state.vx) > .45 && (state.current === "C" || state.current === "A" || state.current === "S")) {
+      const step = Math.sin(phase * (state.current === "S" ? 1.55 : 2.25));
+      if (state.current === "S") {
+        motion.y -= Math.max(0, step) * 5.5;
+        motion.rotation = step * .014;
+        motion.scaleY = 1 - Math.max(0, -step) * .018;
+        motion.shadowScale = 1 - Math.max(0, step) * .13;
+      } else if (state.current === "A") {
+        // Raven ground travel is a steady alternating footstep with only a tiny body bob.
+        motion.y -= Math.max(0, step) * .65;
+        motion.x += state.facing * Math.max(0, step) * 1.2;
+        motion.rotation = step * .009;
+        motion.shadowScale = 1;
+      } else {
+        // Flamingos take deliberate stilted steps; their wings stay folded on land.
+        motion.y -= Math.abs(step) * 1.1;
+        motion.rotation = step * .012;
+        motion.shadowScale = 1;
+      }
     } else {
       motion.rotation = 0;
       motion.shadowScale = 1;
@@ -847,9 +935,12 @@ function creatureMotion() {
     motion.rotation = Math.max(-.08, Math.min(.08, state.vy * .008)) - state.vx * .0015;
     motion.shadowScale = state.grounded ? 1 : .72;
   } else if (state.current === "A" && state.mode === "chaos") {
-    motion.y += Math.sin(phase) * 3 * moving;
-    motion.rotation = Math.sin(phase * .55) * .042 * moving;
-    motion.scaleX = 1 + Math.sin(phase) * .012;
+    const stride = Math.sin(phase * 1.05);
+    motion.y += Math.sin(phase * 1.05) * 4.6 * moving;
+    motion.x += state.facing * Math.max(0, stride) * 5.5 * moving;
+    motion.rotation = Math.sin(phase * .52) * .06 * moving;
+    motion.scaleX = 1 + Math.max(0, stride) * .075 * moving;
+    motion.scaleY = 1 - Math.max(0, stride) * .03 * moving;
   } else {
     const stride = Math.sin(phase);
     const bound = Math.abs(Math.sin(phase * .5)) * moving;
@@ -880,27 +971,19 @@ function drawCreature(img, w, h, motion) {
   ctx.rotate(motion.rotation || 0);
   ctx.scale((motion.facing || 1) * (motion.scaleX || 1), motion.scaleY || 1);
   if (motion.blur) ctx.filter = `blur(${motion.blur}px)`;
+  if (motion.snowyOwl) ctx.filter = "grayscale(.92) brightness(1.28) contrast(1.12) saturate(.4)";
   if (state.ability > 0 && !motion.ghost) {
     ctx.shadowColor = PEOPLE[state.current].accent;
     ctx.shadowBlur = 28;
   }
 
-  if (state.current === "E" && state.mode === "human" && !motion.ghost) drawLongHair(w, h);
-
   if (Number.isFinite(motion.frameIndex)) {
     const frameCount = motion.frameCount || 1;
-    const sourceW = img.naturalWidth / frameCount;
-    const framePosition = ((motion.frameIndex % frameCount) + frameCount) % frameCount;
-    const firstFrame = Math.floor(framePosition);
-    const blend = (framePosition - firstFrame) ** 2 * (3 - 2 * (framePosition - firstFrame));
-    const baseAlpha = ctx.globalAlpha;
-    ctx.globalAlpha = baseAlpha * (1 - blend);
-    ctx.drawImage(img, firstFrame * sourceW, 0, sourceW, img.naturalHeight, -w * .5, -h * .95, w, h);
-    if (blend > .001) {
-      ctx.globalAlpha = baseAlpha * blend;
-      ctx.drawImage(img, ((firstFrame + 1) % frameCount) * sourceW, 0, sourceW, img.naturalHeight, -w * .5, -h * .95, w, h);
-    }
-    ctx.globalAlpha = baseAlpha;
+    const sequence = motion.frameSequence || [0, 1, 2, 3];
+    const framePosition = ((motion.frameIndex % sequence.length) + sequence.length) % sequence.length;
+    // Use discrete poses. Crossfading transparent cutouts creates doubled edges and apparent blinking.
+    const frameIndex = sequence[Math.floor(framePosition)];
+    drawNormalizedFrame(img, frameCount, frameIndex, motion.frameBase, w, h);
   } else if (motion.wave && !motion.ghost) {
     const strips = 14;
     const sourceW = img.naturalWidth / strips;
@@ -912,33 +995,46 @@ function drawCreature(img, w, h, motion) {
   } else {
     ctx.drawImage(img, -w * .5, -h * .95, w, h);
   }
+  if (motion.ravenScarf && !motion.ghost) drawRavenScarf(w, h);
   ctx.restore();
 }
 
-function drawLongHair(w, h) {
-  const sway = Math.sin(state.motionPhase * .78) * w * .025;
-  const fill = ctx.createLinearGradient(-w * .3, -h * .78, w * .12, -h * .42);
-  fill.addColorStop(0, "#090d16");
-  fill.addColorStop(.55, "#171c28");
-  fill.addColorStop(1, "#272e3b");
-  ctx.save();
-  ctx.fillStyle = fill;
-  ctx.beginPath();
-  ctx.moveTo(w * .12, -h * .83);
-  ctx.bezierCurveTo(-w * .02, -h * .88, -w * .14, -h * .81, -w * .19 + sway, -h * .70);
-  ctx.bezierCurveTo(-w * .23 + sway, -h * .58, -w * .34 + sway, -h * .49, -w * .28 + sway, -h * .37);
-  ctx.bezierCurveTo(-w * .21 + sway, -h * .45, -w * .15 + sway, -h * .51, -w * .09, -h * .62);
-  ctx.bezierCurveTo(-w * .01, -h * .73, w * .05, -h * .74, w * .12, -h * .83);
-  ctx.closePath();
-  ctx.fill();
-  ctx.strokeStyle = "rgba(126,143,164,.58)";
-  ctx.lineWidth = Math.max(1, w * .012);
-  for (let i = 0; i < 3; i++) {
-    ctx.beginPath();
-    ctx.moveTo(w * (.04 - i * .035), -h * (.77 - i * .02));
-    ctx.bezierCurveTo(-w * .10 + sway, -h * .68, -w * .27 + sway, -h * .55, -w * (.23 + i * .025) + sway, -h * (.41 + i * .025));
-    ctx.stroke();
+function drawNormalizedFrame(img, frameCount, frameIndex, reference, w, h) {
+  const boxes = getAlphaBoxes(img, frameCount);
+  const box = boxes[frameIndex];
+  const refBox = getAlphaBoxes(reference, 1)[0];
+  if (!box || !refBox) {
+    const cellW = img.naturalWidth / frameCount;
+    ctx.drawImage(img, frameIndex * cellW, 0, cellW, img.naturalHeight, -w * .5, -h * .95, w, h);
+    return;
   }
+  const targetSize = Math.max(refBox.width * (w / reference.naturalWidth), refBox.height * (h / reference.naturalHeight));
+  const scale = targetSize / Math.max(box.width, box.height);
+  const cellW = img.naturalWidth / frameCount;
+  const dw = box.width * scale;
+  const dh = box.height * scale;
+  ctx.drawImage(img, frameIndex * cellW + box.x, box.y, box.width, box.height, -dw * .5, -dh, dw, dh);
+}
+
+function drawRavenScarf(w, h) {
+  ctx.save();
+  ctx.fillStyle = "#c82f42";
+  ctx.strokeStyle = "#861b2b";
+  ctx.lineWidth = Math.max(1.5, w * .012);
+  ctx.beginPath();
+  ctx.moveTo(w * .015, -h * .48);
+  ctx.quadraticCurveTo(w * .13, -h * .40, w * .27, -h * .46);
+  ctx.lineTo(w * .30, -h * .38);
+  ctx.quadraticCurveTo(w * .16, -h * .31, w * .025, -h * .39);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(w * .18, -h * .40);
+  ctx.quadraticCurveTo(w * .27, -h * .30, w * .25, -h * .17);
+  ctx.lineTo(w * .19, -h * .12);
+  ctx.quadraticCurveTo(w * .13, -h * .28, w * .12, -h * .39);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
   ctx.restore();
 }
 
