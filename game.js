@@ -12,10 +12,10 @@ const PEOPLE = {
   A: {
     age: "Adult",
     accent: "#d84c59",
-    art: { human: "assets/forms/a-human.webp", run: "assets/forms/a-human-run.webp", flight: "assets/forms/a-flight.webp", flightRun: "assets/forms/a-flight-run.webp", chaos: "assets/forms/a-chaos.webp" },
+    art: { human: "assets/forms/a-human.webp", run: "assets/forms/a-human-run.webp", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run.webp", bite: "assets/forms/a-wolf-bite.webp" },
     human: { animal: "Human", ability: "Protective force", description: "Remove an obstacle from everyone else's problem list." },
-    flight: { animal: "Peacock", ability: "Dramatic charge", description: "Turn every entrance into a loud, feathery announcement." },
-    chaos: { animal: "Giant black wolf", ability: "Pack-force smash", description: "Clear a path with enormous, protective wolf energy." }
+    flight: { animal: "Raven", ability: "Hooked-beak rush", description: "A huge raven with a beak built for dramatic entrances." },
+    chaos: { animal: "Giant black wolf", ability: "Bite · E / Pack-force smash · R", description: "Bite, then clear a path with enormous protective wolf energy." }
   },
   S: {
     age: "Adult",
@@ -28,7 +28,7 @@ const PEOPLE = {
   E: {
     age: "Preteen",
     accent: "#20c9c3",
-    art: { human: "assets/forms/e-human.webp", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-flight.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
+    art: { human: "assets/forms/e-human.webp", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-flight.webp", flightRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
     human: { animal: "Human", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
     flight: { animal: "Great horned owl", ability: "Night sight", description: "Reveal secrets and move without announcing it." },
     chaos: { animal: "Cheetah", ability: "Fast as heck", description: "Turn a tiny opening into a full-speed blur." }
@@ -72,7 +72,7 @@ document.querySelectorAll(".form-choice").forEach(button => button.addEventListe
 
 for (const [id, p] of Object.entries(PEOPLE)) {
   images[id] = {};
-  for (const mode of [...modes, "run", "flightRun", "chaosRun"]) {
+  for (const mode of [...modes, "run", "flightRun", "chaosRun", "peacock", "peacockRun", "bite"]) {
     if (!p.art[mode]) continue;
     const img = new Image();
     img.src = p.art[mode];
@@ -100,6 +100,9 @@ const state = {
   smashed: new Set(),
   reveal: 0,
   ability: 0,
+  bite: 0,
+  peacockTimer: 0,
+  peacockHudTick: 0,
   elapsed: 0,
   finished: false,
   level: "space",
@@ -146,7 +149,7 @@ const crates = [
 ];
 
 function resetGame() {
-  Object.assign(state, { running: true, current: "C", mode: selectedMode, x: 120, y: GROUND, vx: 0, vy: 0, grounded: true, facing: 1, camera: 0, reveal: 0, ability: 0, elapsed: 0, finished: false, level: "forest", motionPhase: 0, transformFlash: 0, landing: 0, trail: [], trailClock: 0 });
+  Object.assign(state, { running: true, current: "C", mode: selectedMode, x: 120, y: GROUND, vx: 0, vy: 0, grounded: true, facing: 1, camera: 0, reveal: 0, ability: 0, bite: 0, peacockTimer: 0, peacockHudTick: 0, elapsed: 0, finished: false, level: "forest", motionPhase: 0, transformFlash: 0, landing: 0, trail: [], trailClock: 0 });
   state.sparks.clear();
   state.spaceSparks.clear();
   state.smashed.clear();
@@ -171,7 +174,11 @@ document.querySelector("#home-button").addEventListener("click", () => {
 });
 
 function buildDock() {
-  dock.innerHTML = order.map(id => `<button class="dock-character" data-id="${id}" type="button"><b>${id}</b><span><strong>${PEOPLE[id][state.mode].animal}</strong><small>${PEOPLE[id][state.mode].ability}</small></span></button>`).join("");
+  dock.innerHTML = order.map(id => {
+    const form = PEOPLE[id][state.mode];
+    const specialPeacock = id === "A" && state.mode === "flight" && state.peacockTimer > 0;
+    return `<button class="dock-character" data-id="${id}" type="button"><b>${id}</b><span><strong>${specialPeacock ? "Peacock" : form.animal}</strong><small>${specialPeacock ? `${state.peacockTimer.toFixed(1)}s show-off` : form.ability}</small></span></button>`;
+  }).join("");
   dock.querySelectorAll("button").forEach(button => button.addEventListener("click", () => switchCharacter(button.dataset.id)));
 }
 
@@ -182,7 +189,7 @@ function switchCharacter(id) {
   state.transformFlash = .28;
   state.trail = [];
   updateHud();
-  say(`${id}: ${PEOPLE[id][state.mode].animal}`);
+  say(`${id}: ${animalNameFor(id)}`);
 }
 
 function transform() {
@@ -191,7 +198,11 @@ function transform() {
   state.transformFlash = .38;
   state.trail = [];
   updateHud();
-  say(`${PEOPLE[state.current][state.mode].animal} form!`);
+  say(`${animalNameFor(state.current)} form!`);
+}
+
+function animalNameFor(id) {
+  return id === "A" && state.mode === "flight" && state.peacockTimer > 0 ? "Peacock" : PEOPLE[id][state.mode].animal;
 }
 
 function updateHud() {
@@ -200,9 +211,12 @@ function updateHud() {
   const initial = document.querySelector("#active-initial");
   initial.textContent = state.current;
   initial.style.background = p.accent;
-  document.querySelector("#active-animal").textContent = f.animal;
+  document.querySelector("#active-animal").textContent = animalNameFor(state.current);
   const formName = state.mode[0].toUpperCase() + state.mode.slice(1);
-  document.querySelector("#active-form").textContent = `${formName} form · ${f.ability}`;
+  const abilityLabel = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0
+    ? `Peacock form · ${state.peacockTimer.toFixed(1)}s remaining`
+    : f.ability;
+  document.querySelector("#active-form").textContent = `${formName} form · ${abilityLabel}`;
   const count = state.level === "space" ? state.spaceSparks.size : state.sparks.size;
   document.querySelector("#case-count").textContent = state.level === "forest" ? "→" : `${count} / 4`;
   document.querySelector("#objective-label").textContent = state.level === "forest" ? "find the clearing" : state.level === "space" ? "cosmic sparks" : "CASE sparks";
@@ -228,16 +242,29 @@ function useAbility() {
     if (id === "E") state.vx = state.facing * 17;
   } else if (state.mode === "flight") {
     if (id === "C") state.vy = -17;
-    if (id === "A") { state.vx = state.facing * 19; smashNearby(150); }
+    if (id === "A") state.vx = state.facing * 17;
     if (id === "S") { state.vy = Math.min(state.vy, -4); state.vx += state.facing * 7; }
     if (id === "E") state.reveal = 4;
   } else {
     if (id === "C") { state.vx = state.facing * 16; revealNearby(); }
-    if (id === "A") smashNearby(180);
+    if (id === "A") { state.bite = .42; state.ability = .22; }
     if (id === "S") state.vx = state.facing * 22;
     if (id === "E") revealNearby(true);
   }
-  say(PEOPLE[id][state.mode].ability);
+  say(id === "A" && state.mode === "chaos" ? "Wolf bite!" : PEOPLE[id][state.mode].ability);
+}
+
+function useSpecial() {
+  if (state.current === "A" && state.mode === "flight") {
+    state.peacockTimer = 5;
+    state.transformFlash = .38;
+    updateHud();
+    say("Peacock! Five seconds of maximum show-off.");
+  } else if (state.current === "A" && state.mode === "chaos") {
+    state.ability = .75;
+    smashNearby(210);
+    say("Pack-force smash!");
+  }
 }
 
 function smashNearby(range) {
@@ -269,13 +296,14 @@ function jump() {
 }
 
 window.addEventListener("keydown", event => {
-  if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(event.key) || /^[wasd]$/i.test(event.key)) event.preventDefault();
-  if (event.repeat && ["e", "E", "f", "F", "Shift"].includes(event.key)) return;
+  if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(event.key) || /^[wasdr]$/i.test(event.key)) event.preventDefault();
+  if (event.repeat && ["e", "E", "f", "F", "r", "R", "Shift"].includes(event.key)) return;
   if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") keys.left = true;
   if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") keys.right = true;
-  if (event.key === "ArrowUp" || event.key === " " || event.key.toLowerCase() === "w") jump();
+  if (event.key === "ArrowUp" || event.key === " " || event.key.toLowerCase() === "w") { keys.jump = true; if (!event.repeat) jump(); }
   if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") keys.down = true;
   if (event.key.toLowerCase() === "e") useAbility();
+  if (event.key.toLowerCase() === "r") useSpecial();
   if (event.key.toLowerCase() === "f" || event.key === "Shift") transform();
   if (["1", "2", "3", "4"].includes(event.key)) switchCharacter(order[Number(event.key) - 1]);
 });
@@ -283,19 +311,21 @@ window.addEventListener("keyup", event => {
   if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") keys.left = false;
   if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") keys.right = false;
   if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") keys.down = false;
+  if (event.key === "ArrowUp" || event.key === " " || event.key.toLowerCase() === "w") keys.jump = false;
 });
-window.addEventListener("blur", () => Object.assign(keys, { left: false, right: false, down: false }));
+window.addEventListener("blur", () => Object.assign(keys, { left: false, right: false, jump: false, down: false }));
 
 document.querySelectorAll("[data-control]").forEach(button => {
   const control = button.dataset.control;
   const down = event => {
     event.preventDefault();
     if (control === "left" || control === "right") keys[control] = true;
-    if (control === "jump") jump();
+    if (control === "jump") { keys.jump = true; jump(); }
     if (control === "ability") useAbility();
+    if (control === "special") useSpecial();
     if (control === "transform") transform();
   };
-  const up = event => { event.preventDefault(); if (control === "left" || control === "right") keys[control] = false; };
+  const up = event => { event.preventDefault(); if (control === "left" || control === "right") keys[control] = false; if (control === "jump") keys.jump = false; };
   button.addEventListener("pointerdown", down);
   button.addEventListener("pointerup", up);
   button.addEventListener("pointercancel", up);
@@ -311,6 +341,13 @@ function update(dt) {
   state.elapsed += dt;
   state.motionPhase += dt * (2.4 + Math.abs(state.vx) * 1.15);
   state.ability = Math.max(0, state.ability - dt);
+  state.bite = Math.max(0, state.bite - dt);
+  if (state.peacockTimer > 0) {
+    const priorTick = Math.ceil(state.peacockTimer * 10);
+    state.peacockTimer = Math.max(0, state.peacockTimer - dt);
+    const nextTick = Math.ceil(state.peacockTimer * 10);
+    if (priorTick !== nextTick) updateHud();
+  }
   state.reveal = Math.max(0, state.reveal - dt);
   state.transformFlash = Math.max(0, state.transformFlash - dt);
   state.landing = Math.max(0, state.landing - dt);
@@ -327,11 +364,13 @@ function update(dt) {
   state.vx = Math.max(-speed, Math.min(speed, state.vx));
   if (state.level === "space") {
     state.vy += (410 - state.y) * .0018;
+    if (state.mode === "flight" && keys.jump) state.vy -= 1.0;
     state.vy *= .992;
+    state.vy = Math.max(-12, Math.min(12, state.vy));
   } else {
-    state.vy += state.mode === "flight" && state.current !== "A" && keys.jump ? .35 : .72;
+    state.vy += state.mode === "flight" ? (keys.jump ? -.52 : .34) : .72;
     if (keys.down && !state.grounded) state.vy += 1.1;
-    state.vy = Math.min(state.vy, 18);
+    state.vy = Math.max(-12, Math.min(state.vy, 18));
   }
 
   const previousY = state.y;
@@ -339,6 +378,7 @@ function update(dt) {
   const worldWidth = state.level === "space" ? SPACE_WIDTH : state.level === "forest" ? FOREST_WIDTH : BACKYARD_WIDTH;
   state.x = Math.max(30, Math.min(worldWidth - 80, state.x));
   state.y += state.vy;
+  if (state.mode === "flight" && state.y < 360) { state.y = 360; state.vy = Math.max(0, state.vy); }
   const wasGrounded = state.grounded;
   state.grounded = false;
 
@@ -703,26 +743,35 @@ function drawSpaceWorld() {
 function drawPlayer() {
   const runningHuman = state.mode === "human" && state.level !== "space" && (Math.abs(state.vx) > .45 || !state.grounded);
   const runKey = `${state.mode}Run`;
-  const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) &&
-    (state.mode === "flight" || Math.abs(state.vx) > .45 || !state.grounded);
-  const img = runningHuman ? images[state.current].run : movingAnimal ? images[state.current][runKey] : images[state.current][state.mode];
+  const peacock = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0;
+  const animalMoving = Math.abs(state.vx) > .45 || !state.grounded;
+  const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && animalMoving;
+  const biteImage = state.current === "A" && state.mode === "chaos" && state.bite > 0;
+  const img = biteImage
+    ? images.A.bite
+    : peacock
+      ? (animalMoving && images.A.peacockRun ? images.A.peacockRun : images.A.peacock)
+      : runningHuman
+        ? images[state.current].run
+        : movingAnimal
+          ? images[state.current][runKey]
+          : images[state.current][state.mode];
   if (!img.complete || !img.naturalWidth) return;
   let w = state.mode === "human" ? 150 : state.mode === "flight" ? 230 : 245;
-  const frameCount = runningHuman || movingAnimal ? 4 : 1;
+  const frameCount = !biteImage && (runningHuman || movingAnimal || (peacock && animalMoving)) ? 4 : 1;
   let h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
   if (state.mode === "human") {
     const humanWidths = { C: 155, A: 145, S: 142, E: 148 };
     w = humanWidths[state.current];
     h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / 4)) : w * (img.naturalHeight / img.naturalWidth);
   }
-  if (state.current === "A" && state.mode === "flight") { w = 205; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
-  if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / img.naturalWidth); }
+  if (state.current === "A" && state.mode === "flight") { w = peacock ? 230 : 260; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
+  if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
   const motion = creatureMotion();
-  if (runningHuman || movingAnimal) {
+  if (!biteImage && (runningHuman || movingAnimal || (peacock && animalMoving))) {
     motion.frameIndex = !state.grounded && state.mode !== "flight" ? 3 : (state.motionPhase * (state.mode === "flight" ? 1.5 : .9)) % 4;
     motion.frameCount = 4;
   }
-  if (state.current === "E" && state.mode === "flight") motion.wave = 5;
 
   if (state.level !== "space") {
     ctx.save();
@@ -777,24 +826,29 @@ function creatureMotion() {
     return motion;
   }
 
-  if (state.mode === "flight" && state.current !== "A") {
-    const wingbeat = Math.sin(phase * 1.35);
-    motion.y += state.grounded ? -Math.abs(wingbeat) * 3 : wingbeat * 5;
-    motion.rotation = Math.max(-.16, Math.min(.16, state.vy * .018)) + Math.sin(phase * .45) * .018;
-    motion.scaleY = 1 + wingbeat * .032;
-    motion.scaleX = 1 - wingbeat * .018;
-    motion.shadowScale = state.grounded ? 1 : .68;
+  if (state.mode === "flight") {
+    if (Math.abs(state.vx) > .45 || !state.grounded) {
+      const wingbeat = Math.sin(phase * 1.35);
+      if (state.grounded) motion.y -= Math.abs(Math.sin(phase * 2.1)) * (state.current === "C" || state.current === "A" ? 9 : 4);
+      else motion.y += wingbeat * 3.5;
+      motion.rotation = Math.max(-.16, Math.min(.16, state.vy * .014)) + Math.sin(phase * .45) * .012;
+      motion.scaleY = 1 + wingbeat * .024;
+      motion.scaleX = 1 - wingbeat * .012;
+      motion.shadowScale = state.grounded ? 1 : .62;
+    } else {
+      motion.rotation = 0;
+      motion.shadowScale = 1;
+    }
   } else if (state.mode === "human") {
     motion.rotation = Math.max(-.08, Math.min(.08, state.vy * .008)) - state.vx * .0015;
     motion.shadowScale = state.grounded ? 1 : .72;
   } else if (state.current === "A" && state.mode === "chaos") {
     motion.y += Math.sin(phase) * 3 * moving;
     motion.rotation = Math.sin(phase * .55) * .042 * moving;
-    motion.wave = 5.5 * moving;
     motion.scaleX = 1 + Math.sin(phase) * .012;
   } else {
     const stride = Math.sin(phase);
-    const bound = Math.abs(Math.sin(phase * .5));
+    const bound = Math.abs(Math.sin(phase * .5)) * moving;
     motion.y -= bound * (5 + moving * 7);
     motion.rotation = stride * .026 * moving - state.vx * .003;
     motion.scaleX = 1 + bound * .035 * moving;
@@ -817,95 +871,3 @@ function creatureMotion() {
 
 function drawCreature(img, w, h, motion) {
   ctx.save();
-  ctx.globalAlpha = motion.alpha ?? 1;
-  ctx.translate(motion.x, motion.y);
-  ctx.rotate(motion.rotation || 0);
-  ctx.scale((motion.facing || 1) * (motion.scaleX || 1), motion.scaleY || 1);
-  if (motion.blur) ctx.filter = `blur(${motion.blur}px)`;
-  if (state.ability > 0 && !motion.ghost) {
-    ctx.shadowColor = PEOPLE[state.current].accent;
-    ctx.shadowBlur = 28;
-  }
-
-  if (state.current === "E" && state.mode === "human" && !motion.ghost) drawLongHair(w, h);
-
-  if (Number.isFinite(motion.frameIndex)) {
-    const frameCount = motion.frameCount || 1;
-    const sourceW = img.naturalWidth / frameCount;
-    const framePosition = ((motion.frameIndex % frameCount) + frameCount) % frameCount;
-    const firstFrame = Math.floor(framePosition);
-    const blend = (framePosition - firstFrame) ** 2 * (3 - 2 * (framePosition - firstFrame));
-    const baseAlpha = ctx.globalAlpha;
-    ctx.globalAlpha = baseAlpha * (1 - blend);
-    ctx.drawImage(img, firstFrame * sourceW, 0, sourceW, img.naturalHeight, -w * .5, -h * .78, w, h);
-    if (blend > .001) {
-      ctx.globalAlpha = baseAlpha * blend;
-      ctx.drawImage(img, ((firstFrame + 1) % frameCount) * sourceW, 0, sourceW, img.naturalHeight, -w * .5, -h * .78, w, h);
-    }
-    ctx.globalAlpha = baseAlpha;
-  } else if (motion.wave && !motion.ghost) {
-    const strips = 14;
-    const sourceW = img.naturalWidth / strips;
-    const drawW = w / strips;
-    for (let i = 0; i < strips; i++) {
-      const offset = Math.sin(state.motionPhase + i * .62) * motion.wave;
-      ctx.drawImage(img, i * sourceW, 0, sourceW + 1, img.naturalHeight, -w * .5 + i * drawW, -h * .78 + offset, drawW + 1, h);
-    }
-  } else {
-    ctx.drawImage(img, -w * .5, -h * .78, w, h);
-  }
-  ctx.restore();
-}
-
-function drawLongHair(w, h) {
-  const sway = Math.sin(state.motionPhase * .78) * w * .025;
-  const fill = ctx.createLinearGradient(-w * .3, -h * .78, w * .12, -h * .42);
-  fill.addColorStop(0, "#090d16");
-  fill.addColorStop(.55, "#171c28");
-  fill.addColorStop(1, "#272e3b");
-  ctx.save();
-  ctx.fillStyle = fill;
-  ctx.beginPath();
-  ctx.moveTo(w * .12, -h * .83);
-  ctx.bezierCurveTo(-w * .02, -h * .88, -w * .14, -h * .81, -w * .19 + sway, -h * .70);
-  ctx.bezierCurveTo(-w * .23 + sway, -h * .58, -w * .34 + sway, -h * .49, -w * .28 + sway, -h * .37);
-  ctx.bezierCurveTo(-w * .21 + sway, -h * .45, -w * .15 + sway, -h * .51, -w * .09, -h * .62);
-  ctx.bezierCurveTo(-w * .01, -h * .73, w * .05, -h * .74, w * .12, -h * .83);
-  ctx.closePath();
-  ctx.fill();
-  ctx.strokeStyle = "rgba(126,143,164,.58)";
-  ctx.lineWidth = Math.max(1, w * .012);
-  for (let i = 0; i < 3; i++) {
-    ctx.beginPath();
-    ctx.moveTo(w * (.04 - i * .035), -h * (.77 - i * .02));
-    ctx.bezierCurveTo(-w * .10 + sway, -h * .68, -w * .27 + sway, -h * .55, -w * (.23 + i * .025) + sway, -h * (.41 + i * .025));
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
-function drawHelp() {
-  if (state.elapsed > 8) return;
-  ctx.save();
-  ctx.globalAlpha = Math.min(1, (8 - state.elapsed) / 1.5);
-  ctx.fillStyle = "rgba(10,14,27,.82)";
-  roundedRect(22, 22, 520, 72, 18); ctx.fill();
-  ctx.fillStyle = "#fff"; ctx.font = "800 18px system-ui"; ctx.fillText("Move: A/D or ←/→   Jump: W/Space", 42, 51);
-  ctx.fillStyle = "#d3d7e2"; ctx.font = "700 15px system-ui"; ctx.fillText("Down: S   Ability: E   Transform: F   Switch: 1–4", 42, 78);
-  ctx.restore();
-}
-
-let lastTime = 0;
-function loop(time) {
-  if (!state.running) return;
-  const dt = Math.min(.034, (time - lastTime) / 1000 || .016);
-  lastTime = time;
-  update(dt);
-  drawBackground();
-  drawWorld();
-  drawHelp();
-  requestAnimationFrame(loop);
-}
-
-updateRoster("human");
-buildDock();

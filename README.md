@@ -7,11 +7,11 @@ A silly, easy browser adventure for four people with human, flight, and chaos fo
 | Character | Human ability | Flight form | Chaos form |
 |---|---|---|---|
 | C | Improvised vault | Flamingo | Red fox |
-| A | Protective force | Peacock | Giant black wolf |
+| A | Protective force | Raven (peacock for 5 seconds with R) | Giant black wolf |
 | S | Rapid plan | Crow | Slim black panther |
 | E | Quick thinking | Great horned owl | Cheetah |
 
-The game opens in human form in a playable forest level. Run to the glowing portal to continue into space, then enter the backyard. Human characters and animal forms animate while moving; birds use wingbeat cycles, while the owl's wings are animated procedurally.
+The game opens in human form in a playable forest level. Run to the glowing portal to continue into space, then enter the backyard. Creatures settle onto the ground when idle; the raven and crow hop when they move, and the owl has a four-pose wingbeat. Hold W while in a flight form to climb, with a screen-top limit.
 
 Aquatic forms and additional animal groups are intentionally reserved for much later unlock systems.
 
@@ -28,6 +28,8 @@ Aquatic forms and additional animal groups are intentionally reserved for much l
 - Jump: `W`, `Space`, or up arrow
 - Crouch / drop: `S` or down arrow
 - Ability: `E`
+- Special: `R` (A becomes a peacock for five seconds in flight form; A's wolf uses pack-force smash in chaos form)
+- Wolf bite: `E` while A is in chaos form
 - Transform: `F` or `Shift` cycles Human → Flight → Chaos
 - Switch character: `1`–`4` or the on-screen character dock
 
