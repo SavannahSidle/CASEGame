@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261004-9";
+const ART_REVISION = "case-20261004-10";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
