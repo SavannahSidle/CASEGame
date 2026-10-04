@@ -871,3 +871,95 @@ function creatureMotion() {
 
 function drawCreature(img, w, h, motion) {
   ctx.save();
+  ctx.globalAlpha = motion.alpha ?? 1;
+  ctx.translate(motion.x, motion.y);
+  ctx.rotate(motion.rotation || 0);
+  ctx.scale((motion.facing || 1) * (motion.scaleX || 1), motion.scaleY || 1);
+  if (motion.blur) ctx.filter = `blur(${motion.blur}px)`;
+  if (state.ability > 0 && !motion.ghost) {
+    ctx.shadowColor = PEOPLE[state.current].accent;
+    ctx.shadowBlur = 28;
+  }
+
+  if (state.current === "E" && state.mode === "human" && !motion.ghost) drawLongHair(w, h);
+
+  if (Number.isFinite(motion.frameIndex)) {
+    const frameCount = motion.frameCount || 1;
+    const sourceW = img.naturalWidth / frameCount;
+    const framePosition = ((motion.frameIndex % frameCount) + frameCount) % frameCount;
+    const firstFrame = Math.floor(framePosition);
+    const blend = (framePosition - firstFrame) ** 2 * (3 - 2 * (framePosition - firstFrame));
+    const baseAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = baseAlpha * (1 - blend);
+    ctx.drawImage(img, firstFrame * sourceW, 0, sourceW, img.naturalHeight, -w * .5, -h * .95, w, h);
+    if (blend > .001) {
+      ctx.globalAlpha = baseAlpha * blend;
+      ctx.drawImage(img, ((firstFrame + 1) % frameCount) * sourceW, 0, sourceW, img.naturalHeight, -w * .5, -h * .95, w, h);
+    }
+    ctx.globalAlpha = baseAlpha;
+  } else if (motion.wave && !motion.ghost) {
+    const strips = 14;
+    const sourceW = img.naturalWidth / strips;
+    const drawW = w / strips;
+    for (let i = 0; i < strips; i++) {
+      const offset = Math.sin(state.motionPhase + i * .62) * motion.wave;
+      ctx.drawImage(img, i * sourceW, 0, sourceW + 1, img.naturalHeight, -w * .5 + i * drawW, -h * .95 + offset, drawW + 1, h);
+    }
+  } else {
+    ctx.drawImage(img, -w * .5, -h * .95, w, h);
+  }
+  ctx.restore();
+}
+
+function drawLongHair(w, h) {
+  const sway = Math.sin(state.motionPhase * .78) * w * .025;
+  const fill = ctx.createLinearGradient(-w * .3, -h * .78, w * .12, -h * .42);
+  fill.addColorStop(0, "#090d16");
+  fill.addColorStop(.55, "#171c28");
+  fill.addColorStop(1, "#272e3b");
+  ctx.save();
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(w * .12, -h * .83);
+  ctx.bezierCurveTo(-w * .02, -h * .88, -w * .14, -h * .81, -w * .19 + sway, -h * .70);
+  ctx.bezierCurveTo(-w * .23 + sway, -h * .58, -w * .34 + sway, -h * .49, -w * .28 + sway, -h * .37);
+  ctx.bezierCurveTo(-w * .21 + sway, -h * .45, -w * .15 + sway, -h * .51, -w * .09, -h * .62);
+  ctx.bezierCurveTo(-w * .01, -h * .73, w * .05, -h * .74, w * .12, -h * .83);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = "rgba(126,143,164,.58)";
+  ctx.lineWidth = Math.max(1, w * .012);
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(w * (.04 - i * .035), -h * (.77 - i * .02));
+    ctx.bezierCurveTo(-w * .10 + sway, -h * .68, -w * .27 + sway, -h * .55, -w * (.23 + i * .025) + sway, -h * (.41 + i * .025));
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawHelp() {
+  if (state.elapsed > 8) return;
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, (8 - state.elapsed) / 1.5);
+  ctx.fillStyle = "rgba(10,14,27,.82)";
+  roundedRect(22, 22, 680, 72, 18); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.font = "800 18px system-ui"; ctx.fillText("Move: A/D or ←/→   Jump: W/Space · Hold W to fly", 42, 51);
+  ctx.fillStyle = "#d3d7e2"; ctx.font = "700 15px system-ui"; ctx.fillText("Down: S   Ability: E   Special: R   Transform: F   Switch: 1–4", 42, 78);
+  ctx.restore();
+}
+
+let lastTime = 0;
+function loop(time) {
+  if (!state.running) return;
+  const dt = Math.min(.034, (time - lastTime) / 1000 || .016);
+  lastTime = time;
+  update(dt);
+  drawBackground();
+  drawWorld();
+  drawHelp();
+  requestAnimationFrame(loop);
+}
+
+updateRoster("human");
+buildDock();
