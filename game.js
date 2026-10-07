@@ -12,7 +12,7 @@ const PEOPLE = {
   A: {
     age: "Adult",
     accent: "#d84c59",
-    art: { human: "assets/forms/a-human.webp", run: "assets/forms/a-human-run.webp", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run.webp", bite: "assets/forms/a-wolf-bite.webp" },
+    art: { human: "assets/forms/a-human-portrait.png", run: "assets/forms/a-human-run.webp", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run.webp", bite: "assets/forms/a-wolf-bite.webp" },
     human: { animal: "Human", ability: "Protective force", description: "Remove an obstacle from everyone else's problem list." },
     flight: { animal: "Raven", ability: "Hooked-beak rush", description: "A huge raven with a beak built for dramatic entrances." },
     chaos: { animal: "Giant black wolf", ability: "Bite · E / Pack-force smash · R", description: "Bite, then clear a path with enormous protective wolf energy." }
@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261004-10";
+const ART_REVISION = "case-20261007-2";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -100,6 +100,15 @@ function personCard(id) {
 }
 
 roster.innerHTML = order.map(personCard).join("");
+
+const FUTURE_FORMS = { aquatic: order, mythical: order };
+function renderLockedForms(group, selector) {
+  document.querySelector(selector).innerHTML = FUTURE_FORMS[group].map(id =>
+    `<button class="locked-form" type="button" disabled aria-disabled="true" title="${group === "aquatic" ? "Aquatic" : "Mythical"} form for ${id} is not selectable yet"><span class="locked-initial">${id}</span><span><strong>Undecided</strong><small>${id} · Locked</small></span><span class="lock-icon" aria-hidden="true">🔒</span></button>`
+  ).join("");
+}
+renderLockedForms("aquatic", "#aquatic-forms");
+renderLockedForms("mythical", "#mythical-forms");
 
 function updateRoster(mode) {
   selectedMode = mode;
