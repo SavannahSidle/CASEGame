@@ -4,7 +4,7 @@ const PEOPLE = {
   C: {
     age: "Teenager",
     accent: "#aa78ef",
-    art: { human: "assets/forms/c-human-20261008.png", run: "assets/forms/c-human-run.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
+    art: { human: "assets/forms/c-human.webp", selectionHuman: "assets/forms/c-human-20261008.png", run: "assets/forms/c-human-run.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
     human: { animal: "Human", ability: "Improvised vault", description: "Find the shortcut by confidently making one up." },
     flight: { animal: "Flamingo", ability: "Stilt vault", description: "Take real, high-stepping strides across the ground, then lift off." },
     chaos: { animal: "Red fox", ability: "Burrow dash", description: "Dig shortcuts and outfox objects with no brain." }
@@ -12,7 +12,7 @@ const PEOPLE = {
   A: {
     age: "Adult",
     accent: "#d84c59",
-    art: { human: "assets/forms/a-human-20261008.png", run: "assets/forms/a-human-run.webp", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run.webp", bite: "assets/forms/a-wolf-bite.webp" },
+    art: { human: "assets/forms/a-human.webp", selectionHuman: "assets/forms/a-human-20261008.png", run: "assets/forms/a-human-run.webp", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run.webp", bite: "assets/forms/a-wolf-bite.webp" },
     human: { animal: "Human", ability: "Protective force", description: "Remove an obstacle from everyone else's problem list." },
     flight: { animal: "Raven", ability: "Hooked-beak rush", description: "A huge raven with a beak built for dramatic entrances." },
     chaos: { animal: "Giant black wolf", ability: "Bite · E / Pack-force smash · R", description: "Bite, then clear a path with enormous protective wolf energy." }
@@ -20,7 +20,7 @@ const PEOPLE = {
   S: {
     age: "Adult",
     accent: "#91a99b",
-    art: { human: "assets/forms/s-human-20261008.png", run: "assets/forms/s-human-run.webp", flight: "assets/forms/s-flight.webp", flightRun: "assets/forms/s-flight-run.webp", chaos: "assets/forms/s-chaos.webp", chaosRun: "assets/forms/s-chaos-run.webp" },
+    art: { human: "assets/forms/s-human.webp", selectionHuman: "assets/forms/s-human-selection-20261008.png", run: "assets/forms/s-human-run.webp", flight: "assets/forms/s-flight.webp", flightRun: "assets/forms/s-flight-run.webp", chaos: "assets/forms/s-chaos.webp", chaosRun: "assets/forms/s-chaos-run.webp" },
     human: { animal: "Human", ability: "Rapid plan", description: "Think three moves ahead, then run there immediately." },
     flight: { animal: "Crow", ability: "Bright idea", description: "Glide, scout, and attract useful shiny things." },
     chaos: { animal: "Slim black panther", ability: "Silent pounce", description: "Slip out of sight, then reappear exactly where useful." }
@@ -28,7 +28,7 @@ const PEOPLE = {
   E: {
     age: "Preteen",
     accent: "#20c9c3",
-    art: { human: "assets/forms/e-human-20261008.png", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-flight.webp", flightRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
+    art: { human: "assets/forms/e-human.webp", selectionHuman: "assets/forms/e-human-selection-20261008.png", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-flight.webp", flightRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
     human: { animal: "Human", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
     flight: { animal: "Snowy owl", ability: "Night sight", description: "Glide silently, spot hidden things, and vanish into the snow." },
     chaos: { animal: "Cheetah", ability: "Fast as heck", description: "Turn a tiny opening into a full-speed blur." }
@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261008-3";
+const ART_REVISION = "case-20261008-4";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -92,7 +92,7 @@ const dock = document.querySelector("#character-dock");
 
 function personCard(id) {
   const p = PEOPLE[id];
-  return `<article class="character-card" data-id="${id}" style="--human-image:url('${p.art.human}');--flight-image:url('${p.art.flight}');--chaos-image:url('${p.art.chaos}')">
+  return `<article class="character-card" data-id="${id}" style="--human-image:url('${p.art.selectionHuman}');--flight-image:url('${p.art.flight}');--chaos-image:url('${p.art.chaos}')">
     <div class="card-top"><span class="card-initial">${id}</span><span class="card-age">${p.age}</span></div>
     <div class="form-art" role="img" aria-label="Human, ${p.flight.animal}, and ${p.chaos.animal} forms"></div>
     <div class="card-copy"><p>${p.human.ability}</p><h2>${p.human.animal}</h2><small>${p.human.description}</small></div>
