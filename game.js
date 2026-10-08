@@ -6,7 +6,7 @@ const PEOPLE = {
     accent: "#aa78ef",
     art: { human: "assets/forms/c-human-20261008.png", run: "assets/forms/c-human-run.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
     human: { animal: "Human", ability: "Improvised vault", description: "Find the shortcut by confidently making one up." },
-    flight: { animal: "Flamingo", ability: "Stilt vault", description: "Balance, wade, and vault with unnecessary elegance." },
+    flight: { animal: "Flamingo", ability: "Stilt vault", description: "Take real, high-stepping strides across the ground, then lift off." },
     chaos: { animal: "Red fox", ability: "Burrow dash", description: "Dig shortcuts and outfox objects with no brain." }
   },
   A: {
@@ -30,7 +30,7 @@ const PEOPLE = {
     accent: "#20c9c3",
     art: { human: "assets/forms/e-human-20261008.png", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-flight.webp", flightRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
     human: { animal: "Human", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
-    flight: { animal: "Great horned owl", ability: "Night sight", description: "Reveal secrets and move without announcing it." },
+    flight: { animal: "Snowy owl", ability: "Night sight", description: "Glide silently, spot hidden things, and vanish into the snow." },
     chaos: { animal: "Cheetah", ability: "Fast as heck", description: "Turn a tiny opening into a full-speed blur." }
   }
 };
@@ -160,6 +160,7 @@ const state = {
   peacockTimer: 0,
   peacockHudTick: 0,
   snowyOwlTimer: 0,
+  batTimer: 0,
   elapsed: 0,
   finished: false,
   level: "space",
@@ -206,7 +207,7 @@ const crates = [
 ];
 
 function resetGame() {
-  Object.assign(state, { running: true, current: "C", mode: selectedMode, x: 120, y: GROUND, vx: 0, vy: 0, grounded: true, facing: 1, camera: 0, reveal: 0, ability: 0, bite: 0, peacockTimer: 0, peacockHudTick: 0, snowyOwlTimer: 0, elapsed: 0, finished: false, level: "forest", motionPhase: 0, transformFlash: 0, landing: 0, trail: [], trailClock: 0 });
+  Object.assign(state, { running: true, current: "C", mode: selectedMode, x: 120, y: GROUND, vx: 0, vy: 0, grounded: true, facing: 1, camera: 0, reveal: 0, ability: 0, bite: 0, peacockTimer: 0, peacockHudTick: 0, snowyOwlTimer: 0, batTimer: 0, elapsed: 0, finished: false, level: "forest", motionPhase: 0, transformFlash: 0, landing: 0, trail: [], trailClock: 0 });
   state.sparks.clear();
   state.spaceSparks.clear();
   state.smashed.clear();
@@ -263,7 +264,8 @@ function transform() {
 
 function animalNameFor(id) {
   if (id === "A" && state.mode === "flight" && state.peacockTimer > 0) return "Peacock";
-  if (id === "E" && state.mode === "flight" && state.snowyOwlTimer > 0) return "Snowy owl";
+  if (id === "S" && state.mode === "flight" && state.batTimer > 0) return "Bat";
+  if (id === "E" && state.mode === "flight" && state.snowyOwlTimer > 0) return "Great horned owl";
   return PEOPLE[id][state.mode].animal;
 }
 
@@ -277,9 +279,11 @@ function updateHud() {
   const formName = state.mode[0].toUpperCase() + state.mode.slice(1);
   const abilityLabel = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0
     ? `Peacock form · ${state.peacockTimer.toFixed(1)}s remaining`
-    : state.current === "E" && state.mode === "flight" && state.snowyOwlTimer > 0
-      ? `Snowy owl · ${state.snowyOwlTimer.toFixed(1)}s remaining`
-      : f.ability;
+    : state.current === "S" && state.mode === "flight" && state.batTimer > 0
+      ? `Bat form · ${state.batTimer.toFixed(1)}s remaining`
+      : state.current === "E" && state.mode === "flight" && state.snowyOwlTimer > 0
+        ? `Great horned owl · ${state.snowyOwlTimer.toFixed(1)}s remaining`
+        : f.ability;
   document.querySelector("#active-form").textContent = `${formName} form · ${abilityLabel}`;
   const count = state.level === "space" ? state.spaceSparks.size : state.sparks.size;
   document.querySelector("#case-count").textContent = state.level === "forest" ? "→" : `${count} / 4`;
@@ -328,11 +332,16 @@ function useSpecial() {
     state.ability = .75;
     smashNearby(210);
     say("Pack-force smash!");
+  } else if (state.current === "S" && state.mode === "flight") {
+    state.batTimer = 5;
+    state.transformFlash = .38;
+    updateHud();
+    say("Bat shift! Five seconds of night flight.");
   } else if (state.current === "E" && state.mode === "flight") {
     state.snowyOwlTimer = 5;
     state.transformFlash = .38;
     updateHud();
-    say("Snowy owl! Five seconds of silent snow-gliding.");
+    say("Great horned owl! Five seconds of silent night-gliding.");
   }
 }
 
@@ -421,6 +430,11 @@ function update(dt) {
     const priorTick = Math.ceil(state.snowyOwlTimer * 10);
     state.snowyOwlTimer = Math.max(0, state.snowyOwlTimer - dt);
     if (priorTick !== Math.ceil(state.snowyOwlTimer * 10)) updateHud();
+  }
+  if (state.batTimer > 0) {
+    const priorTick = Math.ceil(state.batTimer * 10);
+    state.batTimer = Math.max(0, state.batTimer - dt);
+    if (priorTick !== Math.ceil(state.batTimer * 10)) updateHud();
   }
   state.reveal = Math.max(0, state.reveal - dt);
   state.transformFlash = Math.max(0, state.transformFlash - dt);
@@ -820,8 +834,8 @@ function drawPlayer() {
   const peacock = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0;
   const animalMoving = Math.abs(state.vx) > .45 || !state.grounded;
   const flying = state.mode === "flight" && !state.grounded;
-  const ravenWalking = state.mode === "flight" && state.current === "A" && state.grounded && Math.abs(state.vx) > .45;
-  const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && (state.mode === "flight" ? flying || ravenWalking : animalMoving);
+  const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C", "S"].includes(state.current);
+  const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && (state.mode === "flight" ? flying || groundedFlightWalk : animalMoving);
   const biteImage = state.current === "A" && state.mode === "chaos" && state.bite > 0;
   const runSheet = runningHuman || movingAnimal || (peacock && flying);
   const img = biteImage
@@ -843,7 +857,7 @@ function drawPlayer() {
     h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / 4)) : w * (img.naturalHeight / img.naturalWidth);
   }
   if (state.current === "A" && state.mode === "flight") { w = peacock ? 230 : 260; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
-  if (state.current === "A" && state.mode === "chaos") { w = 260; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
+  if (state.current === "A" && state.mode === "chaos") { w = 300; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
   const motion = creatureMotion();
   if (!biteImage && runSheet) {
     const cycle = ANIMATION_FRAMES[`${state.current}:${state.mode}`] || WALK_CYCLE;
@@ -852,7 +866,8 @@ function drawPlayer() {
     motion.frameSequence = cycle;
     motion.frameCount = 4;
   }
-  motion.snowyOwl = state.current === "E" && state.mode === "flight" && state.snowyOwlTimer > 0;
+  motion.snowyOwl = state.current === "E" && state.mode === "flight" && state.snowyOwlTimer <= 0;
+  motion.bat = state.current === "S" && state.mode === "flight" && state.batTimer > 0;
   motion.ravenScarf = state.current === "A" && state.mode === "flight" && !peacock;
   motion.frameBase = images[state.current][state.mode];
 
@@ -973,6 +988,38 @@ function creatureMotion() {
   return motion;
 }
 
+function drawBatSilhouette(w, h) {
+  const flap = Math.sin(state.elapsed * 13) * .16;
+  const half = w * .5;
+  const bodyY = -h * .06;
+  ctx.fillStyle = "#171522";
+  ctx.beginPath();
+  ctx.moveTo(0, bodyY - h * .18);
+  ctx.lineTo(-w * .07, bodyY - h * .39);
+  ctx.lineTo(-w * .16, bodyY - h * .2);
+  ctx.lineTo(-half, bodyY - h * (.03 + flap));
+  ctx.lineTo(-w * .38, bodyY + h * (.1 + flap));
+  ctx.lineTo(-w * .26, bodyY + h * .04);
+  ctx.lineTo(-w * .16, bodyY + h * .19);
+  ctx.lineTo(-w * .08, bodyY + h * .1);
+  ctx.lineTo(0, bodyY + h * .21);
+  ctx.lineTo(w * .08, bodyY + h * .1);
+  ctx.lineTo(w * .16, bodyY + h * .19);
+  ctx.lineTo(w * .26, bodyY + h * .04);
+  ctx.lineTo(w * .38, bodyY + h * (.1 + flap));
+  ctx.lineTo(half, bodyY - h * (.03 + flap));
+  ctx.lineTo(w * .16, bodyY - h * .2);
+  ctx.lineTo(w * .07, bodyY - h * .39);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, bodyY, w * .075, h * .25, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(0, bodyY - h * .2, w * .075, 0, Math.PI * 2);
+  ctx.fill();
+}
+
 function drawCreature(img, w, h, motion) {
   ctx.save();
   ctx.globalAlpha = motion.alpha ?? 1;
@@ -986,7 +1033,9 @@ function drawCreature(img, w, h, motion) {
     ctx.shadowBlur = 28;
   }
 
-  if (Number.isFinite(motion.frameIndex)) {
+  if (motion.bat && !motion.ghost) {
+    drawBatSilhouette(w, h);
+  } else if (Number.isFinite(motion.frameIndex)) {
     const frameCount = motion.frameCount || 1;
     const sequence = motion.frameSequence || [0, 1, 2, 3];
     const framePosition = ((motion.frameIndex % sequence.length) + sequence.length) % sequence.length;
