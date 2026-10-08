@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261008-1";
+const ART_REVISION = "case-20261008-2";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -101,10 +101,19 @@ function personCard(id) {
 
 roster.innerHTML = order.map(personCard).join("");
 
-const FUTURE_FORMS = { aquatic: order, mythical: order };
+const FUTURE_FORMS = {
+  aquatic: order.map(id => ({ id, name: "Undecided" })),
+  mythical: [
+    { id: "C", name: "Kraken", detail: "The deep calls." },
+    { id: "A", name: "Black land dragon", detail: "Guardian of the land; the peasants live because she lets them." },
+    { id: "S", name: "Undecided" },
+    { id: "E", name: "Undecided" }
+  ]
+};
 function renderLockedForms(group, selector) {
-  document.querySelector(selector).innerHTML = FUTURE_FORMS[group].map(id =>
-    `<button class="locked-form" type="button" disabled aria-disabled="true" title="${group === "aquatic" ? "Aquatic" : "Mythical"} form for ${id} is not selectable yet"><span class="locked-initial">${id}</span><span><strong>Undecided</strong><small>${id} · Locked</small></span><span class="lock-icon" aria-hidden="true">🔒</span></button>`
+  const label = group === "aquatic" ? "Aquatic" : "Mythical";
+  document.querySelector(selector).innerHTML = FUTURE_FORMS[group].map(({ id, name, detail }) =>
+    `<button class="locked-form" type="button" disabled aria-disabled="true" title="${detail || `${label} form for ${id} is not selected yet`}"><span class="locked-initial">${id}</span><span><strong>${name}</strong><small>${detail || `${id} · Locked`}</small></span><span class="lock-icon" aria-hidden="true">🔒</span></button>`
   ).join("");
 }
 renderLockedForms("aquatic", "#aquatic-forms");
@@ -859,6 +868,7 @@ function drawPlayer() {
   if (state.current === "A" && state.mode === "flight") { w = peacock ? 230 : 260; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
   if (state.current === "A" && state.mode === "chaos") { w = 300; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
   const motion = creatureMotion();
+  if (state.current === "A" && state.mode === "chaos") motion.scaleX *= 1.1;
   if (!biteImage && runSheet) {
     const cycle = ANIMATION_FRAMES[`${state.current}:${state.mode}`] || WALK_CYCLE;
     const rate = state.current === "E" && state.mode === "flight" ? .43 : state.mode === "flight" ? .72 : state.current === "A" && state.mode === "chaos" ? 1.16 : 1.02;
