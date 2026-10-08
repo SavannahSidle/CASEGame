@@ -77,7 +77,7 @@ button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .card-top { position: absolute; z-index: 2; inset: 18px 18px auto; display: flex; justify-content: space-between; align-items: center; }
 .card-initial { display: grid; place-items: center; width: 43px; aspect-ratio: 1; border-radius: 14px; color: #0d1020; background: var(--accent); font-size: 1.35rem; font-weight: 950; }
 .card-age { color: var(--muted); font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
-.form-art { position: absolute; inset: 55px 5% 83px; display: block; width: 90%; height: calc(100% - 138px); object-fit: contain; object-position: center bottom; background: none; transform-origin: center bottom; filter: drop-shadow(0 18px 12px rgba(0,0,0,.36)); transition: opacity .2s, transform .5s; }
+.form-art { position: absolute; top: 55px; left: 5%; right: 5%; bottom: 83px; display: block; width: 90%; height: auto; max-height: calc(100% - 138px); object-fit: contain; object-position: center bottom; background: none; transform-origin: center bottom; filter: drop-shadow(0 18px 12px rgba(0,0,0,.36)); transition: opacity .2s, transform .5s; }
 .character-card.chaos .form-art { transform: scale(1.02); }
 .character-card.flight[data-id="A"] .form-art { transform: scale(1.28); translate: 0 -8px; }
 .character-card.flight[data-id="S"] .form-art { transform: scale(1.04); translate: 0 -8px; }
