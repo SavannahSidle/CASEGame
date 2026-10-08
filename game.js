@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261008-14";
+const ART_REVISION = "case-20261008-15";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -884,7 +884,6 @@ function drawPlayer() {
   }
   motion.snowyOwl = state.current === "E" && state.mode === "flight" && state.snowyOwlTimer <= 0;
   motion.bat = state.current === "S" && state.mode === "flight" && state.batTimer > 0;
-  motion.ravenScarf = state.current === "A" && state.mode === "flight" && !peacock;
   motion.frameBase = images[state.current][state.mode];
 
   if (state.level !== "space") {
@@ -1084,7 +1083,6 @@ function drawCreature(img, w, h, motion) {
   } else {
     ctx.drawImage(img, -w * .5, -h * .95, w, h);
   }
-  if (motion.ravenScarf && !motion.ghost) drawRavenScarf(w, h);
   ctx.restore();
 }
 
@@ -1109,29 +1107,7 @@ function drawRavenScarf(w, h) {
   ctx.save();
   ctx.fillStyle = "#c82f42";
   ctx.strokeStyle = "#861b2b";
-  ctx.lineWidth = Math.max(1.5, w * .012);
-  ctx.beginPath();
-  ctx.moveTo(w * .015, -h * .48);
-  ctx.quadraticCurveTo(w * .13, -h * .40, w * .27, -h * .46);
-  ctx.lineTo(w * .30, -h * .38);
-  ctx.quadraticCurveTo(w * .16, -h * .31, w * .025, -h * .39);
-  ctx.closePath();
-  ctx.fill(); ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(w * .18, -h * .40);
-  ctx.quadraticCurveTo(w * .27, -h * .30, w * .25, -h * .17);
-  ctx.lineTo(w * .19, -h * .12);
-  ctx.quadraticCurveTo(w * .13, -h * .28, w * .12, -h * .39);
-  ctx.closePath();
-  ctx.fill(); ctx.stroke();
-  ctx.restore();
-}
-
-function drawHelp() {
-  if (state.elapsed > 8) return;
-  ctx.save();
-  ctx.globalAlpha = Math.min(1, (8 - state.elapsed) / 1.5);
-  ctx.fillStyle = "rgba(10,14,27,.82)";
+  ctx.lineWidth = Math.max(1.5, w * .012);rgba(10,14,27,.82)";
   roundedRect(22, 22, 680, 72, 18); ctx.fill();
   ctx.fillStyle = "#fff"; ctx.font = "800 18px system-ui"; ctx.fillText("Move: A/D or ←/→   Jump: W/Space · Hold W to fly", 42, 51);
   ctx.fillStyle = "#d3d7e2"; ctx.font = "700 15px system-ui"; ctx.fillText("Down: S   Ability: E   Special: R   Transform: F   Switch: 1–4", 42, 78);
