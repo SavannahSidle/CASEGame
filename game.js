@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261008-5";
+const ART_REVISION = "case-20261008-6";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -94,7 +94,7 @@ function personCard(id) {
   const p = PEOPLE[id];
   return `<article class="character-card" data-id="${id}" style="--human-image:url('${p.art.selectionHuman}');--flight-image:url('${p.art.flight}');--chaos-image:url('${p.art.chaos}')">
     <div class="card-top"><span class="card-initial">${id}</span><span class="card-age">${p.age}</span></div>
-    <img class="form-art" src="${p.art.selectionHuman}" alt="${id} human form">
+    <img class="form-art" src="${p.art.human}" alt="${id} human form">
     <div class="card-copy"><p>${p.human.ability}</p><h2>${p.human.animal}</h2><small>${p.human.description}</small></div>
   </article>`;
 }
@@ -131,7 +131,7 @@ function updateRoster(mode) {
     card.querySelector(".card-copy h2").textContent = form.animal;
     card.querySelector(".card-copy small").textContent = form.description;
     const art = card.querySelector(".form-art");
-    art.src = mode === "human" ? p.art.selectionHuman : p.art[mode];
+    art.src = mode === "human" ? p.art.human : p.art[mode];
     art.alt = `${card.dataset.id} ${form.animal} form`;
   });
 }
