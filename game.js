@@ -104,8 +104,8 @@ roster.innerHTML = order.map(personCard).join("");
 const FUTURE_FORMS = {
   aquatic: order.map(id => ({ id, name: "Undecided" })),
   mythical: [
-    { id: "C", name: "Kraken", detail: "The deep calls." },
-    { id: "A", name: "Black land dragon", detail: "Guardian of the land; the peasants live because she lets them." },
+    { id: "C", name: "Undecided" },
+    { id: "A", name: "Undecided" },
     { id: "S", name: "Undecided" },
     { id: "E", name: "Undecided" }
   ]
