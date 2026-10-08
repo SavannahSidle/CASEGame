@@ -132,7 +132,7 @@ function updateRoster(mode) {
     card.querySelector(".card-copy small").textContent = form.description;
     const art = card.querySelector(".form-art");
     art.src = mode === "human" ? p.art.selectionHuman : p.art[mode];
-    art.alt = `${id} ${form.animal} form`;
+    art.alt = `${card.dataset.id} ${form.animal} form`;
   });
 }
 
