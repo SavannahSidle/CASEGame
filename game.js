@@ -406,13 +406,13 @@ document.querySelectorAll("[data-control]").forEach(button => {
   const control = button.dataset.control;
   const down = event => {
     event.preventDefault();
-    if (control === "left" || control === "right") keys[control] = true;
+    if (control === "left" || control === "right" || control === "down") keys[control] = true;
     if (control === "jump") { keys.jump = true; jump(); }
     if (control === "ability") useAbility();
     if (control === "special") useSpecial();
     if (control === "transform") transform();
   };
-  const up = event => { event.preventDefault(); if (control === "left" || control === "right") keys[control] = false; if (control === "jump") keys.jump = false; };
+  const up = event => { event.preventDefault(); if (control === "left" || control === "right" || control === "down") keys[control] = false; if (control === "jump") keys.jump = false; };
   button.addEventListener("pointerdown", down);
   button.addEventListener("pointerup", up);
   button.addEventListener("pointercancel", up);
