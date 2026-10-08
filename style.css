@@ -77,14 +77,15 @@ button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .card-top { position: absolute; z-index: 2; inset: 18px 18px auto; display: flex; justify-content: space-between; align-items: center; }
 .card-initial { display: grid; place-items: center; width: 43px; aspect-ratio: 1; border-radius: 14px; color: #0d1020; background: var(--accent); font-size: 1.35rem; font-weight: 950; }
 .card-age { color: var(--muted); font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
-.form-art { position: absolute; inset: 55px 5% 83px; background-image: var(--human-image); background-repeat: no-repeat; background-size: contain; background-position: center; filter: drop-shadow(0 18px 12px rgba(0,0,0,.36)); transition: opacity .2s, transform .5s; }
+.form-art { position: absolute; inset: 55px 5% 83px; background-image: var(--human-image); background-repeat: no-repeat; background-size: contain; background-position: center bottom; transform-origin: center bottom; filter: drop-shadow(0 18px 12px rgba(0,0,0,.36)); transition: opacity .2s, transform .5s; }
 .character-card[data-id="S"]:not(.flight):not(.chaos) .form-art { background-image: url("assets/forms/s-human-selection-20261008.png?v=case-20261008-1"); }
 .character-card[data-id="E"]:not(.flight):not(.chaos) .form-art { background-image: url("assets/forms/e-human-selection-20261008.png?v=case-20261008-1"); }
 .character-card.flight .form-art { background-image: var(--flight-image); }
 .character-card.chaos .form-art { background-image: var(--chaos-image); transform: scale(1.02); }
 .character-card.flight[data-id="A"] .form-art { transform: scale(1.28); translate: 0 -8px; }
 .character-card.flight[data-id="S"] .form-art { transform: scale(1.04); translate: 0 -8px; }
-.character-card.chaos[data-id="A"] .form-art { transform: scale(1.18); }
+.character-card.flight[data-id="E"] .form-art { filter: grayscale(.92) brightness(1.28) contrast(1.12) saturate(.4) drop-shadow(0 18px 12px rgba(0,0,0,.36)); }
+.character-card.chaos[data-id="A"] .form-art { transform: scale(1.3, 1.22); }
 .character-card.chaos[data-id="S"] .form-art { transform: scale(1.1); }
 .character-card.chaos[data-id="C"] .form-art { transform: scale(.9); }
 .character-card.chaos[data-id="E"] .form-art { transform: scale(.9); }
