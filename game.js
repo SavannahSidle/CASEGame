@@ -843,7 +843,7 @@ function drawPlayer() {
   const peacock = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0;
   const animalMoving = Math.abs(state.vx) > .45 || !state.grounded;
   const flying = state.mode === "flight" && !state.grounded;
-  const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C", "S"].includes(state.current);
+  const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C"].includes(state.current);
   const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && (state.mode === "flight" ? flying || groundedFlightWalk : animalMoving);
   const biteImage = state.current === "A" && state.mode === "chaos" && state.bite > 0;
   const runSheet = runningHuman || movingAnimal || (peacock && flying);
