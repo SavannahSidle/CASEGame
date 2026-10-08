@@ -843,7 +843,7 @@ function drawPlayer() {
   const peacock = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0;
   const animalMoving = Math.abs(state.vx) > .45 || !state.grounded;
   const flying = state.mode === "flight" && !state.grounded;
-  const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C"].includes(state.current);
+  const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C", "S", "E"].includes(state.current);
   const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && (state.mode === "flight" ? flying || groundedFlightWalk : animalMoving);
   const biteImage = state.current === "A" && state.mode === "chaos" && state.bite > 0;
   const runSheet = runningHuman || movingAnimal || (peacock && flying);
@@ -942,7 +942,7 @@ function creatureMotion() {
       motion.scaleY = 1 + wingbeat * .012;
       motion.scaleX = 1 - wingbeat * .006;
       motion.shadowScale = .62;
-    } else if (Math.abs(state.vx) > .45 && (state.current === "C" || state.current === "A" || state.current === "S")) {
+    } else if (Math.abs(state.vx) > .45 && ["C", "A", "S", "E"].includes(state.current)) {
       const step = Math.sin(phase * (state.current === "S" ? 1.55 : 2.25));
       if (state.current === "S") {
         motion.y -= Math.max(0, step) * 5.5;
