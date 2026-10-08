@@ -45,6 +45,9 @@ const modes = ["human", "flight", "chaos"];
 let selectedMode = "human";
 
 const ANIMATION_FRAMES = {
+  // Keep the existing run art; these gentle frame holds give C and E distinct, natural strides.
+  "C:human": [0, 1, 2, 3, 2, 1],
+  "E:human": [0, 1, 2, 3, 1, 2],
   // Skip the owl sheet's front-facing outlier; the repeated downstroke gives it a calm glide.
   "E:flight": [0, 1, 3, 1]
 };
@@ -874,7 +877,7 @@ function drawPlayer() {
   if (state.current === "A" && state.mode === "chaos") motion.scaleX *= 1.1;
   if (!biteImage && runSheet) {
     const cycle = ANIMATION_FRAMES[`${state.current}:${state.mode}`] || WALK_CYCLE;
-    const rate = state.current === "E" && state.mode === "flight" ? .43 : state.mode === "flight" ? .72 : state.current === "A" && state.mode === "chaos" ? 1.16 : 1.02;
+    const rate = state.current === "E" && state.mode === "flight" ? .43 : state.mode === "flight" ? .72 : state.current === "A" && state.mode === "chaos" ? 1.16 : state.current === "C" && state.mode === "human" ? .84 : state.current === "E" && state.mode === "human" ? 1.12 : 1.02;
     motion.frameIndex = (state.motionPhase * rate) % cycle.length;
     motion.frameSequence = cycle;
     motion.frameCount = 4;
@@ -971,6 +974,21 @@ function creatureMotion() {
   } else if (state.mode === "human") {
     motion.rotation = Math.max(-.08, Math.min(.08, state.vy * .008)) - state.vx * .0015;
     motion.shadowScale = state.grounded ? 1 : .72;
+    if (state.grounded && moving > 0 && state.current === "C") {
+      const stride = state.motionPhase * .84;
+      const compression = Math.max(0, Math.sin(stride));
+      motion.y -= compression * 2.6 * moving;
+      motion.rotation += Math.sin(stride * .5) * .012 * moving;
+      motion.scaleY = 1 - compression * .012 * moving;
+      motion.shadowScale *= 1 - compression * .045 * moving;
+    } else if (state.grounded && moving > 0 && state.current === "E") {
+      const stride = state.motionPhase * 1.12;
+      const compression = Math.max(0, Math.sin(stride));
+      motion.y -= compression * 1.8 * moving;
+      motion.rotation += Math.sin(stride * .5) * .008 * moving;
+      motion.scaleY = 1 - compression * .009 * moving;
+      motion.shadowScale *= 1 - compression * .03 * moving;
+    }
   } else if (state.current === "A" && state.mode === "chaos") {
     const stride = Math.sin(phase * 1.05);
     motion.y += Math.sin(phase * 1.05) * 4.6 * moving;
