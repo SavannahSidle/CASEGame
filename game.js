@@ -21,14 +21,14 @@ const PEOPLE = {
     age: "Adult",
     accent: "#91a99b",
     art: { human: "assets/forms/s-human-brows-20261009.webp", selectionHuman: "assets/forms/s-human-brows-20261009.webp", run: "assets/forms/s-human-run.webp", flight: "assets/forms/s-flight.webp", flightRun: "assets/forms/s-flight-run.webp", chaos: "assets/forms/s-chaos.webp", chaosRun: "assets/forms/s-chaos-run.webp" },
-    human: { animal: "Human", ability: "Rapid plan", description: "Think three moves ahead, then run there immediately." },
+    human: { animal: "Human", ability: "Intellect", description: "Read the pattern, connect the clues, and find the best move." },
     flight: { animal: "Crow", ability: "Bright idea", description: "Glide, scout, and attract useful shiny things." },
     chaos: { animal: "Slim black panther", ability: "Silent pounce", description: "Slip out of sight, then reappear exactly where useful." }
   },
   E: {
     age: "Preteen",
     accent: "#20c9c3",
-    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-flight-run.webp", horned: "assets/forms/e-flight.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
+    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-snowy-owl-run.svg", horned: "assets/forms/e-flight.webp", hornedRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
     human: { animal: "Human", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
     flight: { animal: "Snowy owl", ability: "Night sight", description: "Glide silently, spot hidden things, and vanish into the snow." },
     chaos: { animal: "Cheetah", ability: "Fast as heck", description: "Turn a tiny opening into a full-speed blur." }
@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-22";
+const ART_REVISION = "case-20261009-23";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -49,7 +49,7 @@ const ANIMATION_FRAMES = {
   "C:human": [0, 1, 2, 3, 2, 1],
   "E:human": [0, 1, 2, 3, 1, 2],
   // Skip the owl sheet's front-facing outlier; the repeated downstroke gives it a calm glide.
-  "E:flight": [0, 1, 3, 1]
+  "E:flight": [0, 1, 2, 3]
 };
 const WALK_CYCLE = [0, 1, 2, 3];
 const frameBoxes = new WeakMap();
@@ -105,10 +105,10 @@ function personCard(id) {
 roster.innerHTML = order.map(personCard).join("");
 
 const FUTURE_FORMS = {
-  aquatic: order.map(id => ({ id, name: "Undecided" })),
+  aquatic: order.map(id => ({ id, name: id === "C" ? "Kraken" : id === "E" ? "Mantis shrimp" : "Undecided" })),
   mythical: [
-    { id: "C", name: "Undecided" },
-    { id: "A", name: "Undecided" },
+    { id: "C", name: "Kraken" },
+    { id: "A", name: "Black dragon" },
     { id: "S", name: "Undecided" },
     { id: "E", name: "Undecided" }
   ]
@@ -383,7 +383,7 @@ function jump() {
     const bonus = state.current === "C" && state.mode === "flight" ? 4 : 0;
     state.vy = -13.5 - bonus;
     state.grounded = false;
-  } else if (state.mode === "flight" && state.current !== "A" && state.vy > -3) {
+  } else if (state.mode === "flight" && state.vy > -3) {
     state.vy = -7;
   }
 }
@@ -851,14 +851,14 @@ function drawPlayer() {
   const animalMoving = Math.abs(state.vx) > .45 || !state.grounded;
   const flying = state.mode === "flight" && !state.grounded;
   const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C", "S"].includes(state.current);
-  const keepFlightArtwork = state.mode === "flight" && (state.current === "A" || (state.current === "E" && !greatHornedOwl));
+  const keepFlightArtwork = state.mode === "flight" && state.current === "A" && !flying;
   const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && (state.mode === "flight" ? (flying || groundedFlightWalk) && !keepFlightArtwork : animalMoving);
   const biteImage = state.current === "A" && state.mode === "chaos" && state.bite > 0;
   const runSheet = runningHuman || movingAnimal || (peacock && flying);
   const img = biteImage
     ? images.A.bite
     : greatHornedOwl
-      ? (movingAnimal && images.E.flightRun ? images.E.flightRun : images.E.horned)
+      ? (movingAnimal && images.E.hornedRun ? images.E.hornedRun : images.E.horned)
       : peacock
       ? (flying && images.A.peacockRun ? images.A.peacockRun : images.A.peacock)
       : runningHuman
@@ -966,7 +966,7 @@ function creatureMotion() {
         motion.shadowScale = 1 - Math.max(0, step) * .13;
       } else if (state.current === "A") {
         // Raven ground travel is a steady alternating footstep with only a tiny body bob.
-        motion.y -= Math.max(0, step) * 2.1;
+        motion.y -= Math.max(0, step) * 5.2;
         motion.x += state.facing * Math.max(0, step) * 2;
         motion.rotation = step * .018;
         motion.shadowScale = 1;
