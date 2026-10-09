@@ -28,7 +28,7 @@ const PEOPLE = {
   E: {
     age: "Preteen",
     accent: "#20c9c3",
-    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run-20261009.svg", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-snowy-owl-run.svg", horned: "assets/forms/e-flight.webp", hornedRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
+    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run-20261009.svg", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-snowy-owl-run.svg", groundRun: "assets/forms/e-snowy-owl-walk.svg", horned: "assets/forms/e-flight.webp", hornedRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
     human: { animal: "Human", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
     flight: { animal: "Snowy owl", ability: "Night sight", description: "Glide silently, spot hidden things, and vanish into the snow." },
     chaos: { animal: "Cheetah", ability: "Fast as heck", description: "Turn a tiny opening into a full-speed blur." }
@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-26";
+const ART_REVISION = "case-20261009-27";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -49,7 +49,8 @@ const ANIMATION_FRAMES = {
   "C:human": [0, 1, 2, 3, 2, 1],
   "E:human": [0, 1, 2, 3, 1, 2],
   // Skip the owl sheet's front-facing outlier; the repeated downstroke gives it a calm glide.
-  "E:flight": [0, 1, 2, 3]
+  "E:flight": [0, 1, 2, 3],
+  "E:flightGround": [0, 1, 2, 1]
 };
 const WALK_CYCLE = [0, 1, 2, 3];
 const frameBoxes = new WeakMap();
@@ -845,12 +846,12 @@ function drawSpaceWorld() {
 
 function drawPlayer() {
   const runningHuman = state.mode === "human" && state.level !== "space" && (Math.abs(state.vx) > .45 || !state.grounded);
-  const runKey = `${state.mode}Run`;
+  const runKey = state.mode === "flight" && state.current === "E" && state.grounded ? "groundRun" : `${state.mode}Run`;
   const peacock = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0;
   const greatHornedOwl = state.current === "E" && state.mode === "flight" && state.snowyOwlTimer > 0;
   const animalMoving = Math.abs(state.vx) > .45 || !state.grounded;
   const flying = state.mode === "flight" && !state.grounded;
-  const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C", "S"].includes(state.current);
+  const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C", "S", "E"].includes(state.current);
   const keepFlightArtwork = state.mode === "flight" && state.current === "A" && !flying;
   const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && (state.mode === "flight" ? (flying || groundedFlightWalk) && !keepFlightArtwork : animalMoving);
   const biteImage = state.current === "A" && state.mode === "chaos" && state.bite > 0;
@@ -886,8 +887,9 @@ function drawPlayer() {
   }
   if (state.current === "A" && state.mode === "chaos") motion.scaleX *= 1.1;
   if (!biteImage && runSheet) {
-    const cycle = ANIMATION_FRAMES[`${state.current}:${state.mode}`] || WALK_CYCLE;
-    const rate = state.current === "E" && state.mode === "flight" ? .43 : state.mode === "flight" ? .72 : state.current === "A" && state.mode === "chaos" ? 1.16 : state.current === "C" && state.mode === "human" ? .84 : state.current === "E" && state.mode === "human" ? 1.12 : 1.02;
+    const animationKey = state.current === "E" && state.mode === "flight" && state.grounded ? "E:flightGround" : `${state.current}:${state.mode}`;
+    const cycle = ANIMATION_FRAMES[animationKey] || WALK_CYCLE;
+    const rate = state.current === "E" && state.mode === "flight" ? (state.grounded ? .82 : .43) : state.mode === "flight" ? .72 : state.current === "A" && state.mode === "chaos" ? 1.16 : state.current === "C" && state.mode === "human" ? .84 : state.current === "E" && state.mode === "human" ? 1.12 : 1.02;
     motion.frameIndex = (state.motionPhase * rate) % cycle.length;
     motion.frameSequence = cycle;
     motion.frameCount = 4;
