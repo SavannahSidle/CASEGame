@@ -28,7 +28,7 @@ const PEOPLE = {
   E: {
     age: "Preteen",
     accent: "#20c9c3",
-    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-flight.webp", flightRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
+    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-flight-run.webp", horned: "assets/forms/e-flight.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
     human: { animal: "Human", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
     flight: { animal: "Snowy owl", ability: "Night sight", description: "Glide silently, spot hidden things, and vanish into the snow." },
     chaos: { animal: "Cheetah", ability: "Fast as heck", description: "Turn a tiny opening into a full-speed blur." }
@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-21";
+const ART_REVISION = "case-20261009-22";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -143,7 +143,7 @@ document.querySelectorAll(".form-choice").forEach(button => button.addEventListe
 
 for (const [id, p] of Object.entries(PEOPLE)) {
   images[id] = {};
-  for (const mode of [...modes, "run", "flightRun", "chaosRun", "peacock", "peacockRun", "bite"]) {
+  for (const mode of [...modes, "run", "flightRun", "chaosRun", "peacock", "peacockRun", "horned", "bite"]) {
     if (!p.art[mode]) continue;
     const img = new Image();
     img.src = p.art[mode];
@@ -471,7 +471,7 @@ function update(dt) {
     state.vy *= .992;
     state.vy = Math.max(-12, Math.min(12, state.vy));
   } else {
-    state.vy += state.mode === "flight" ? (keys.jump ? -.52 : .34) : .72;
+    state.vy += state.mode === "flight" ? (keys.jump ? -.52 : state.current === "S" ? .88 : .34) : .72;
     if (keys.down && !state.grounded) state.vy += 1.1;
     state.vy = Math.max(-12, Math.min(state.vy, 18));
   }
@@ -847,15 +847,19 @@ function drawPlayer() {
   const runningHuman = state.mode === "human" && state.level !== "space" && (Math.abs(state.vx) > .45 || !state.grounded);
   const runKey = `${state.mode}Run`;
   const peacock = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0;
+  const greatHornedOwl = state.current === "E" && state.mode === "flight" && state.snowyOwlTimer > 0;
   const animalMoving = Math.abs(state.vx) > .45 || !state.grounded;
   const flying = state.mode === "flight" && !state.grounded;
-  const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C", "S", "E"].includes(state.current);
-  const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && (state.mode === "flight" ? flying || groundedFlightWalk : animalMoving);
+  const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C", "S"].includes(state.current);
+  const keepFlightArtwork = state.mode === "flight" && (state.current === "A" || (state.current === "E" && !greatHornedOwl));
+  const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && (state.mode === "flight" ? (flying || groundedFlightWalk) && !keepFlightArtwork : animalMoving);
   const biteImage = state.current === "A" && state.mode === "chaos" && state.bite > 0;
   const runSheet = runningHuman || movingAnimal || (peacock && flying);
   const img = biteImage
     ? images.A.bite
-    : peacock
+    : greatHornedOwl
+      ? (movingAnimal && images.E.flightRun ? images.E.flightRun : images.E.horned)
+      : peacock
       ? (flying && images.A.peacockRun ? images.A.peacockRun : images.A.peacock)
       : runningHuman
         ? images[state.current].run
@@ -888,9 +892,9 @@ function drawPlayer() {
     motion.frameSequence = cycle;
     motion.frameCount = 4;
   }
-  motion.snowyOwl = state.current === "E" && state.mode === "flight" && state.snowyOwlTimer <= 0;
+  motion.snowyOwl = false;
   motion.bat = state.current === "S" && state.mode === "flight" && state.batTimer > 0;
-  motion.frameBase = images[state.current][state.mode];
+  motion.frameBase = greatHornedOwl ? images.E.horned : images[state.current][state.mode];
 
   if (state.level !== "space") {
     ctx.save();
@@ -962,9 +966,9 @@ function creatureMotion() {
         motion.shadowScale = 1 - Math.max(0, step) * .13;
       } else if (state.current === "A") {
         // Raven ground travel is a steady alternating footstep with only a tiny body bob.
-        motion.y -= Math.max(0, step) * .65;
-        motion.x += state.facing * Math.max(0, step) * 1.2;
-        motion.rotation = step * .009;
+        motion.y -= Math.max(0, step) * 2.1;
+        motion.x += state.facing * Math.max(0, step) * 2;
+        motion.rotation = step * .018;
         motion.shadowScale = 1;
       } else {
         // Flamingos take deliberate stilted steps; their wings stay folded on land.
