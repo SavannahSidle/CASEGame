@@ -12,7 +12,7 @@ const PEOPLE = {
   A: {
     age: "Adult",
     accent: "#d84c59",
-    art: { human: "assets/forms/a-human-police-20261009.webp", selectionHuman: "assets/forms/a-human-police-20261009.webp", run: "assets/forms/a-human-run.webp", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run.webp", bite: "assets/forms/a-wolf-bite.webp" },
+    art: { human: "assets/forms/a-human-police-20261009.webp", selectionHuman: "assets/forms/a-human-police-20261009.webp", run: "assets/forms/a-human-run-20261009.svg", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run.webp", bite: "assets/forms/a-wolf-bite.webp" },
     human: { animal: "Human", ability: "Protective force", description: "Remove an obstacle from everyone else's problem list." },
     flight: { animal: "Raven", ability: "Hooked-beak rush", description: "A huge raven with a beak built for dramatic entrances." },
     chaos: { animal: "Giant black wolf", ability: "Bite · E / Pack-force smash · R", description: "Bite, then clear a path with enormous protective wolf energy." }
@@ -20,7 +20,7 @@ const PEOPLE = {
   S: {
     age: "Adult",
     accent: "#91a99b",
-    art: { human: "assets/forms/s-human-brows-20261009.webp", selectionHuman: "assets/forms/s-human-brows-20261009.webp", run: "assets/forms/s-human-run.webp", flight: "assets/forms/s-flight.webp", flightRun: "assets/forms/s-flight-run.webp", chaos: "assets/forms/s-chaos.webp", chaosRun: "assets/forms/s-chaos-run.webp" },
+    art: { human: "assets/forms/s-human-brows-20261009.webp", selectionHuman: "assets/forms/s-human-brows-20261009.webp", run: "assets/forms/s-human-run-20261009.svg", flight: "assets/forms/s-flight.webp", flightRun: "assets/forms/s-flight-run.webp", chaos: "assets/forms/s-chaos.webp", chaosRun: "assets/forms/s-chaos-run.webp" },
     human: { animal: "Human", ability: "Intellect", description: "Read the pattern, connect the clues, and find the best move." },
     flight: { animal: "Crow", ability: "Bright idea", description: "Glide, scout, and attract useful shiny things." },
     chaos: { animal: "Slim black panther", ability: "Silent pounce", description: "Slip out of sight, then reappear exactly where useful." }
@@ -28,7 +28,7 @@ const PEOPLE = {
   E: {
     age: "Preteen",
     accent: "#20c9c3",
-    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run.webp", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-snowy-owl-run.svg", horned: "assets/forms/e-flight.webp", hornedRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
+    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run-20261009.svg", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-snowy-owl-run.svg", horned: "assets/forms/e-flight.webp", hornedRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
     human: { animal: "Human", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
     flight: { animal: "Snowy owl", ability: "Night sight", description: "Glide silently, spot hidden things, and vanish into the snow." },
     chaos: { animal: "Cheetah", ability: "Fast as heck", description: "Turn a tiny opening into a full-speed blur." }
@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-25";
+const ART_REVISION = "case-20261009-26";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
