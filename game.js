@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-23";
+const ART_REVISION = "case-20261009-24";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -911,6 +911,7 @@ function drawPlayer() {
     drawCreature(img, w, h, { ...motion, x: trail.x, y: trail.y, facing: trail.facing, alpha, blur: 5, ghost: true });
   });
   drawCreature(img, w, h, motion);
+  if (state.current === "A" && state.mode === "flight" && flying && !peacock && runSheet) drawRavenFlightScarf(img, w, h, motion);
 
   if (state.transformFlash > 0) {
     const progress = state.transformFlash / .38;
@@ -923,6 +924,46 @@ function drawPlayer() {
     ctx.stroke();
     ctx.restore();
   }
+}
+
+
+function drawRavenFlightScarf(img, w, h, motion) {
+  const sequence = motion.frameSequence || WALK_CYCLE;
+  const framePosition = ((motion.frameIndex % sequence.length) + sequence.length) % sequence.length;
+  const frameIndex = sequence[Math.floor(framePosition)];
+  const box = getAlphaBoxes(img, motion.frameCount || 4)[frameIndex];
+  const reference = getAlphaBoxes(images.A.flight, 1)[0];
+  if (!box || !reference) return;
+  const targetSize = Math.max(reference.width * (w / images.A.flight.naturalWidth), reference.height * (h / images.A.flight.naturalHeight));
+  const scale = targetSize / Math.max(box.width, box.height);
+  const drawW = box.width * scale;
+  const drawH = box.height * scale;
+  const x = drawW * .27;
+  const y = -drawH * .4;
+  ctx.save();
+  ctx.translate(motion.x, motion.y);
+  ctx.rotate(motion.rotation || 0);
+  ctx.scale((motion.facing || 1) * (motion.scaleX || 1), motion.scaleY || 1);
+  ctx.lineJoin = "round";
+  ctx.lineWidth = Math.max(1.5, drawW * .009);
+  ctx.strokeStyle = "#59121e";
+  ctx.fillStyle = "#b91f36";
+  ctx.beginPath();
+  ctx.moveTo(x - drawW * .055, y - drawH * .028);
+  ctx.quadraticCurveTo(x, y - drawH * .065, x + drawW * .056, y - drawH * .02);
+  ctx.lineTo(x + drawW * .043, y + drawH * .025);
+  ctx.quadraticCurveTo(x, y + drawH * .047, x - drawW * .045, y + drawH * .02);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x - drawW * .018, y + drawH * .018);
+  ctx.quadraticCurveTo(x + drawW * .01, y + drawH * .045, x + drawW * .032, y + drawH * .07);
+  ctx.lineTo(x + drawW * .008, y + drawH * .24);
+  ctx.quadraticCurveTo(x - drawW * .028, y + drawH * .17, x - drawW * .04, y + drawH * .105);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = "#ed6670";
+  ctx.lineWidth = Math.max(1, drawW * .004);
+  ctx.beginPath(); ctx.moveTo(x - drawW * .024, y + drawH * .042); ctx.lineTo(x - drawW * .01, y + drawH * .12); ctx.stroke();
+  ctx.restore();
 }
 
 function creatureMotion() {
