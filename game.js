@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-16";
+const ART_REVISION = "case-20261009-17";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -1103,11 +1103,11 @@ function drawNormalizedFrame(img, frameCount, frameIndex, reference, w, h) {
   ctx.drawImage(img, frameIndex * cellW + box.x, box.y, box.width, box.height, -dw * .5, -dh, dw, dh);
 }
 
-function drawRavenScarf(w, h) {
+function drawHelp() {
+  if (state.elapsed > 8) return;
   ctx.save();
-  ctx.fillStyle = "#c82f42";
-  ctx.strokeStyle = "#861b2b";
-  ctx.lineWidth = Math.max(1.5, w * .012);rgba(10,14,27,.82)";
+  ctx.globalAlpha = Math.min(1, (8 - state.elapsed) / 1.5);
+  ctx.fillStyle = "rgba(10,14,27,.82)";
   roundedRect(22, 22, 680, 72, 18); ctx.fill();
   ctx.fillStyle = "#fff"; ctx.font = "800 18px system-ui"; ctx.fillText("Move: A/D or ←/→   Jump: W/Space · Hold W to fly", 42, 51);
   ctx.fillStyle = "#d3d7e2"; ctx.font = "700 15px system-ui"; ctx.fillText("Down: S   Ability: E   Special: R   Transform: F   Switch: 1–4", 42, 78);
