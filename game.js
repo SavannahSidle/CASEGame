@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-20";
+const ART_REVISION = "case-20261009-21";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -876,7 +876,7 @@ function drawPlayer() {
   const motion = creatureMotion();
   if (state.mode === "human") {
     const stature = { A: 1.15, C: 1, S: 1, E: .85 };
-    const width = { A: .96, C: 1, S: .96, E: 1 };
+    const width = { A: 1.15, C: 1, S: .96, E: 1 };
     motion.scaleY *= stature[state.current] || 1;
     motion.scaleX *= width[state.current] || 1;
   }
