@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-27";
+const ART_REVISION = "case-20261009-28";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -144,7 +144,7 @@ document.querySelectorAll(".form-choice").forEach(button => button.addEventListe
 
 for (const [id, p] of Object.entries(PEOPLE)) {
   images[id] = {};
-  for (const mode of [...modes, "run", "flightRun", "chaosRun", "peacock", "peacockRun", "horned", "bite"]) {
+  for (const mode of [...modes, "run", "flightRun", "groundRun", "chaosRun", "peacock", "peacockRun", "horned", "hornedRun", "bite"]) {
     if (!p.art[mode]) continue;
     const img = new Image();
     img.src = p.art[mode];
@@ -851,7 +851,7 @@ function drawPlayer() {
   const greatHornedOwl = state.current === "E" && state.mode === "flight" && state.snowyOwlTimer > 0;
   const animalMoving = Math.abs(state.vx) > .45 || !state.grounded;
   const flying = state.mode === "flight" && !state.grounded;
-  const groundedFlightWalk = state.mode === "flight" && state.grounded && Math.abs(state.vx) > .45 && ["A", "C", "S", "E"].includes(state.current);
+  const groundedFlightWalk = state.mode === "flight" && state.current === "E" && state.grounded && Math.abs(state.vx) > .45;
   const keepFlightArtwork = state.mode === "flight" && state.current === "A" && !flying;
   const movingAnimal = state.mode !== "human" && Boolean(images[state.current][runKey]) && (state.mode === "flight" ? (flying || groundedFlightWalk) && !keepFlightArtwork : animalMoving);
   const biteImage = state.current === "A" && state.mode === "chaos" && state.bite > 0;
@@ -1003,15 +1003,27 @@ function creatureMotion() {
     } else if (Math.abs(state.vx) > .45 && ["C", "A", "S", "E"].includes(state.current)) {
       const step = Math.sin(phase * (state.current === "S" ? 1.55 : 2.25));
       if (state.current === "S") {
-        motion.y -= Math.max(0, step) * 5.5;
+        // Crow hops use the same approved still artwork; only the grounded position changes.
+        motion.y -= Math.max(0, step) * 10.5;
         motion.rotation = step * .014;
         motion.scaleY = 1 - Math.max(0, -step) * .018;
         motion.shadowScale = 1 - Math.max(0, step) * .13;
       } else if (state.current === "A") {
-        // Raven ground travel is a steady alternating footstep with only a tiny body bob.
-        motion.y -= Math.max(0, step) * 5.2;
-        motion.x += state.facing * Math.max(0, step) * 2;
-        motion.rotation = step * .018;
+        // Raven keeps its scarfed standing art and makes a small hop on the ground.
+        motion.y -= Math.max(0, step) * 8.5;
+        motion.x += state.facing * Math.max(0, step) * 1.2;
+        motion.rotation = step * .012;
+        motion.shadowScale = 1;
+      } else if (state.current === "C") {
+        // Flamingo takes short stilted steps; wing frames are reserved for flight.
+        motion.y -= Math.abs(step) * 2.4;
+        motion.rotation = step * .012;
+        motion.shadowScale = 1;
+      } else if (state.current === "E") {
+        const owlStep = Math.sin(phase * 2.15);
+        motion.y -= Math.abs(owlStep) * 1.6;
+        motion.x += state.facing * Math.max(0, owlStep) * .8;
+        motion.rotation = owlStep * .012;
         motion.shadowScale = 1;
       } else {
         // Flamingos take deliberate stilted steps; their wings stay folded on land.
