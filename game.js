@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-24";
+const ART_REVISION = "case-20261009-25";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -939,7 +939,7 @@ function drawRavenFlightScarf(img, w, h, motion) {
   const drawW = box.width * scale;
   const drawH = box.height * scale;
   const x = drawW * .27;
-  const y = -drawH * .4;
+  const y = -drawH * .56;
   ctx.save();
   ctx.translate(motion.x, motion.y);
   ctx.rotate(motion.rotation || 0);
@@ -957,8 +957,8 @@ function drawRavenFlightScarf(img, w, h, motion) {
   ctx.beginPath();
   ctx.moveTo(x - drawW * .018, y + drawH * .018);
   ctx.quadraticCurveTo(x + drawW * .01, y + drawH * .045, x + drawW * .032, y + drawH * .07);
-  ctx.lineTo(x + drawW * .008, y + drawH * .24);
-  ctx.quadraticCurveTo(x - drawW * .028, y + drawH * .17, x - drawW * .04, y + drawH * .105);
+  ctx.lineTo(x + drawW * .008, y + drawH * .3);
+  ctx.quadraticCurveTo(x - drawW * .028, y + drawH * .21, x - drawW * .04, y + drawH * .105);
   ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.strokeStyle = "#ed6670";
   ctx.lineWidth = Math.max(1, drawW * .004);
