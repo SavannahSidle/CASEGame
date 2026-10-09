@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-28";
+const ART_REVISION = "case-20261009-29";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -878,6 +878,11 @@ function drawPlayer() {
   }
   if (state.current === "A" && state.mode === "flight") { w = peacock ? 230 : 260; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
   if (state.current === "A" && state.mode === "chaos") { w = 300; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
+  if (state.current === "E" && state.mode === "flight" && flying && runSheet) {
+    // Keep the owl's spread-wing poses close to the standing owl's on-screen scale.
+    w = 185;
+    h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
+  }
   const motion = creatureMotion();
   if (state.mode === "human") {
     const stature = { A: 1.15, C: 1, S: 1, E: .85 };
