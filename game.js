@@ -4,7 +4,7 @@ const PEOPLE = {
   C: {
     age: "Teenager",
     accent: "#aa78ef",
-    art: { human: "assets/forms/c-human-refined-20261009.webp", selectionHuman: "assets/forms/c-human-refined-20261009.webp", run: "assets/forms/c-human-run-restored.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
+    art: { human: "assets/forms/c-human-refined-20261009.webp", selectionHuman: "assets/forms/c-human-refined-20261009.webp", run: "assets/forms/c-human-run-20261010.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
     human: { animal: "Human", ability: "Improvised vault", description: "Find the shortcut by confidently making one up." },
     flight: { animal: "Flamingo", ability: "Stilt vault", description: "Take real, high-stepping strides across the ground, then lift off." },
     chaos: { animal: "Red fox", ability: "Burrow dash", description: "Dig shortcuts and outfox objects with no brain." }
@@ -12,7 +12,7 @@ const PEOPLE = {
   A: {
     age: "Adult",
     accent: "#d84c59",
-    art: { human: "assets/forms/a-human-police-20261009.webp", selectionHuman: "assets/forms/a-human-police-20261009.webp", run: "assets/forms/a-human-run-20261009.svg", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run.webp", bite: "assets/forms/a-wolf-bite.webp" },
+    art: { human: "assets/forms/a-human-police-20261009.webp", selectionHuman: "assets/forms/a-human-police-20261009.webp", run: "assets/forms/a-human-run-20261010.webp", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run-20261010.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run-20261010.webp", bite: "assets/forms/a-wolf-bite.webp" },
     human: { animal: "Human", ability: "Protective force", description: "Remove an obstacle from everyone else's problem list." },
     flight: { animal: "Raven", ability: "Hooked-beak rush", description: "A huge raven with a beak built for dramatic entrances." },
     chaos: { animal: "Giant black wolf", ability: "Bite · E / Pack-force smash · R", description: "Bite, then clear a path with enormous protective wolf energy." }
@@ -20,7 +20,7 @@ const PEOPLE = {
   S: {
     age: "Adult",
     accent: "#91a99b",
-    art: { human: "assets/forms/s-human-brows-20261009.webp", selectionHuman: "assets/forms/s-human-brows-20261009.webp", run: "assets/forms/s-human-run-20261009.svg", flight: "assets/forms/s-flight.webp", flightRun: "assets/forms/s-flight-run.webp", chaos: "assets/forms/s-chaos.webp", chaosRun: "assets/forms/s-chaos-run.webp" },
+    art: { human: "assets/forms/s-human-brows-20261009.webp", selectionHuman: "assets/forms/s-human-brows-20261009.webp", run: "assets/forms/s-human-run-20261010.webp", flight: "assets/forms/s-flight.webp", flightRun: "assets/forms/s-flight-run.webp", chaos: "assets/forms/s-chaos.webp", chaosRun: "assets/forms/s-chaos-run-20261010.webp" },
     human: { animal: "Human", ability: "Intellect", description: "Read the pattern, connect the clues, and find the best move." },
     flight: { animal: "Crow", ability: "Bright idea", description: "Glide, scout, and attract useful shiny things." },
     chaos: { animal: "Slim black panther", ability: "Silent pounce", description: "Slip out of sight, then reappear exactly where useful." }
@@ -28,7 +28,7 @@ const PEOPLE = {
   E: {
     age: "Preteen",
     accent: "#20c9c3",
-    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run-20261009.svg", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-snowy-owl-run.svg", groundRun: "assets/forms/e-snowy-owl-walk.svg", horned: "assets/forms/e-flight.webp", hornedRun: "assets/forms/e-flight-run.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run.webp" },
+    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run-20261010.webp", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-snowy-owl-run.svg", groundRun: "assets/forms/e-snowy-owl-walk.svg", horned: "assets/forms/e-flight.webp", hornedRun: "assets/forms/e-flight-run-20261010.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run-20261010.webp" },
     human: { animal: "Human", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
     flight: { animal: "Snowy owl", ability: "Night sight", description: "Glide silently, spot hidden things, and vanish into the snow." },
     chaos: { animal: "Cheetah", ability: "Fast as heck", description: "Turn a tiny opening into a full-speed blur." }
@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261009-32";
+const ART_REVISION = "case-20261010-34";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -45,6 +45,8 @@ const modes = ["human", "flight", "chaos"];
 let selectedMode = "human";
 
 const ANIMATION_FRAMES = {
+  "A:human": [0, 1, 2, 3, 4, 3, 2, 1],
+  "A:chaos": [0, 1, 2, 3, 4, 3, 2, 1],
   // Keep the existing run art; these gentle frame holds give C and E distinct, natural strides.
   "C:human": [0, 1, 2, 3, 2, 1],
   "E:human": [0, 1, 2, 3, 1, 2],
@@ -53,6 +55,7 @@ const ANIMATION_FRAMES = {
   "E:flightGround": [0, 1, 2, 1]
 };
 const WALK_CYCLE = [0, 1, 2, 3];
+const SHEET_FRAME_COUNTS = { "A:human": 5, "A:chaos": 5 };
 const frameBoxes = new WeakMap();
 
 function getAlphaBoxes(img, count = 1) {
@@ -869,12 +872,13 @@ function drawPlayer() {
           : images[state.current][state.mode];
   if (!img.complete || !img.naturalWidth) return;
   let w = state.mode === "human" ? 150 : state.mode === "flight" ? 230 : 245;
-  const frameCount = !biteImage && runSheet ? 4 : 1;
+  const animationKey = `${state.current}:${state.mode}`;
+  const frameCount = !biteImage && runSheet ? (SHEET_FRAME_COUNTS[animationKey] || 4) : 1;
   let h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
   if (state.mode === "human") {
     const humanWidths = { C: 155, A: 145, S: 142, E: 148 };
     w = humanWidths[state.current];
-    h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / 4)) : w * (img.naturalHeight / img.naturalWidth);
+    h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / frameCount)) : w * (img.naturalHeight / img.naturalWidth);
   }
   if (state.current === "A" && state.mode === "flight") { w = peacock ? 230 : 260; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
   if (state.current === "A" && state.mode === "chaos") { w = 300; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
@@ -897,7 +901,7 @@ function drawPlayer() {
     const rate = state.current === "E" && state.mode === "flight" ? (state.grounded ? .82 : .43) : state.mode === "flight" ? .72 : state.current === "A" && state.mode === "chaos" ? 1.16 : state.current === "C" && state.mode === "human" ? .84 : state.current === "E" && state.mode === "human" ? 1.12 : 1.02;
     motion.frameIndex = (state.motionPhase * rate) % cycle.length;
     motion.frameSequence = cycle;
-    motion.frameCount = 4;
+    motion.frameCount = frameCount;
   }
   motion.snowyOwl = false;
   motion.bat = state.current === "S" && state.mode === "flight" && state.batTimer > 0;
@@ -1198,3 +1202,4 @@ function loop(time) {
 
 updateRoster("human");
 buildDock();
+
