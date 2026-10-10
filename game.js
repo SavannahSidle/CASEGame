@@ -28,7 +28,7 @@ const PEOPLE = {
   E: {
     age: "Preteen",
     accent: "#20c9c3",
-    art: { human: "assets/forms/e-human-bangs-20261008.webp", selectionHuman: "assets/forms/e-human-bangs-20261008.webp", run: "assets/forms/e-human-run-20261010.webp", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-snowy-owl-run.svg", groundRun: "assets/forms/e-snowy-owl-walk.svg", horned: "assets/forms/e-flight.webp", hornedRun: "assets/forms/e-flight-run-20261010.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run-20261010.webp" },
+    art: { human: "assets/forms/e-human-realistic-20261010.webp", selectionHuman: "assets/forms/e-human-realistic-20261010.webp", run: "assets/forms/e-human-run-realistic-20261010.webp", flight: "assets/forms/e-snowy-owl.svg", flightRun: "assets/forms/e-snowy-owl-run.svg", groundRun: "assets/forms/e-snowy-owl-walk.svg", horned: "assets/forms/e-flight.webp", hornedRun: "assets/forms/e-flight-run-20261010.webp", chaos: "assets/forms/e-chaos.webp", chaosRun: "assets/forms/e-chaos-run-20261010.webp" },
     human: { animal: "Human", ability: "Quick thinking", description: "A small person with an alarmingly large speed boost." },
     flight: { animal: "Snowy owl", ability: "Night sight", description: "Glide silently, spot hidden things, and vanish into the snow." },
     chaos: { animal: "Cheetah", ability: "Fast as heck", description: "Turn a tiny opening into a full-speed blur." }
@@ -1202,4 +1202,5 @@ function loop(time) {
 
 updateRoster("human");
 buildDock();
+
 
