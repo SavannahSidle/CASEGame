@@ -4,7 +4,7 @@ const PEOPLE = {
   C: {
     age: "Teenager",
     accent: "#aa78ef",
-    art: { human: "assets/forms/c-human-refined-20261009.webp", selectionHuman: "assets/forms/c-human-refined-20261009.webp", run: "assets/forms/c-human-run-20261010.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
+    art: { human: "assets/forms/c-human-refined-outfit-20261010.webp", selectionHuman: "assets/forms/c-human-refined-outfit-20261010.webp", run: "assets/forms/c-human-run-20261010.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
     human: { animal: "Human", ability: "Improvised vault", description: "Find the shortcut by confidently making one up." },
     flight: { animal: "Flamingo", ability: "Stilt vault", description: "Take real, high-stepping strides across the ground, then lift off." },
     chaos: { animal: "Red fox", ability: "Burrow dash", description: "Dig shortcuts and outfox objects with no brain." }
@@ -36,7 +36,7 @@ const PEOPLE = {
 };
 
 const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261010-34";
+const ART_REVISION = "case-20261010-35";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
