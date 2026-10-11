@@ -59,13 +59,13 @@ PEOPLE.S3 = {
   shortLabel: "S++",
   art: {
     ...PEOPLE.S2.art,
-    human: "assets/forms/s-human-spp-face-hair-feet-20261011.webp",
-    selectionHuman: "assets/forms/s-human-spp-face-hair-feet-20261011.webp"
+    human: "assets/forms/s-human-spp-proportion-hands-20261011.webp",
+    selectionHuman: "assets/forms/s-human-spp-proportion-hands-20261011.webp"
   },
   human: {
     ...PEOPLE.S2.human,
     animal: "Human · S++",
-    description: "Playable S++ duplicate with the refined face and loose hair, fuller waist, chest paw prints, forearm tattoo, and bare feet."
+    description: "Playable S++ duplicate with the corrected hairline, viewer-left forearm tattoo, delicate hands, slimmer lower legs, fuller torso, chest paw prints, and bare feet."
   }
 };
 
