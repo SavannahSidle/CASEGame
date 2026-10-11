@@ -80,7 +80,7 @@ button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .form-art { position: absolute; z-index: 1; top: 55px; left: 5%; right: auto; bottom: auto; display: block; width: 90%; height: auto; max-height: calc(100% - 168px); object-fit: contain; object-position: center bottom; background: none; transform-origin: center bottom; filter: drop-shadow(0 18px 12px rgba(0,0,0,.36)); transition: opacity .2s, transform .5s; }
 /* Human stature tiers; animal transformations keep their existing sizing. */
 .character-card:not(.flight):not(.chaos)[data-id="A"] .form-art { transform: scale(1.15, 1.15); }
-.character-card:not(.flight):not(.chaos)[data-id="S"] .form-art { transform: scale(.96, 1); }
+.character-card:not(.flight):not(.chaos)[data-id="S"] .form-art { inset: 0; width: 100%; height: 100%; max-height: none; object-fit: contain; background: #000; transform: none; }
 .character-card:not(.flight):not(.chaos)[data-id="E"] .form-art { transform: scale(.98, .85); }
 .character-card.chaos .form-art { transform: scale(1.02); }
 .character-card.flight[data-id="A"] .form-art { transform: scale(1.28); translate: 0 -8px; }
@@ -192,4 +192,46 @@ canvas { display: block; width: 100%; height: auto; aspect-ratio: 16/9; touch-ac
   .move-controls, .action-controls { gap: 4px; }
   .mobile-controls button { width: 44px; height: 50px; border-radius: 13px; }
   .mobile-controls .special { width: 44px; }
+}
+
+
+/* S's portrait work is scoped to S and its separate standing-art review panel. */
+.s-refinement-preview {
+  display: grid;
+  grid-template-columns: minmax(220px, 330px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(20px, 4vw, 48px);
+  margin: 22px 0 0;
+  padding: clamp(16px, 3vw, 30px);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--sage) 28%, var(--line));
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(145,169,155,.11), rgba(12,16,30,.86) 56%);
+  box-shadow: inset 0 1px rgba(255,255,255,.06), 0 20px 45px rgba(0,0,0,.2);
+}
+.s-refinement-art {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  background: #000;
+  box-shadow: 0 18px 40px rgba(0,0,0,.38);
+}
+.s-refinement-art img { display: block; width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: contain; }
+.s-refinement-copy { max-width: 650px; }
+.s-refinement-copy h2 { margin: 0 0 10px; font-size: clamp(1.45rem, 3vw, 2rem); }
+.s-refinement-copy > p:not(.eyebrow) { color: var(--muted); line-height: 1.6; }
+.s-refinement-focus { display: grid; gap: 8px; padding-left: 1.2rem; color: #d9dee6; }
+.s-refinement-focus li::marker { color: var(--sage); }
+.s-refinement-checklist { display: inline-flex; align-items: center; gap: 9px; margin-top: 10px; padding: 11px 14px; border: 1px solid rgba(145,169,155,.38); border-radius: 12px; color: var(--ink); background: rgba(145,169,155,.1); font-weight: 800; text-decoration: none; }
+.s-refinement-checklist:hover { background: rgba(145,169,155,.2); }
+.s-refinement-checklist span { font-size: 1.2em; }
+
+@media (max-width: 900px) {
+  .s-refinement-preview { grid-template-columns: minmax(190px, 260px) minmax(0, 1fr); gap: 20px; }
+}
+@media (max-width: 560px) {
+  .s-refinement-preview { grid-template-columns: 1fr; }
+  .s-refinement-art { width: min(100%, 320px); margin-inline: auto; }
+  .s-refinement-copy { width: 100%; }
 }
