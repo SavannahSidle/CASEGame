@@ -221,6 +221,7 @@ canvas { display: block; width: 100%; height: auto; aspect-ratio: 16/9; touch-ac
   background: #000;
   box-shadow: 0 18px 40px rgba(0,0,0,.38);
 }
+.s-sppp-preview .s-refinement-art { background: transparent; }
 .s-refinement-art img { display: block; width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: contain; }
 .s-refinement-copy { max-width: 650px; }
 .s-refinement-copy h2 { margin: 0 0 10px; font-size: clamp(1.45rem, 3vw, 2rem); }
