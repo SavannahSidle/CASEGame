@@ -35,8 +35,27 @@ const PEOPLE = {
   }
 };
 
-const order = ["C", "A", "S", "E"];
-const ART_REVISION = "case-20261010-41";
+PEOPLE.S2 = {
+  ...PEOPLE.S,
+  age: "Adult · Refined",
+  displayName: "S · Refined",
+  shortLabel: "S+",
+  art: {
+    ...PEOPLE.S.art,
+    human: "assets/forms/s-human-splus-eye-hair-refined-20261011.webp",
+    selectionHuman: "assets/forms/s-human-splus-eye-hair-refined-20261011.webp"
+  },
+  human: {
+    ...PEOPLE.S.human,
+    animal: "Human · Refined",
+    description: "Playable S duplicate with the updated face, ears, hands, and animation-ready hair."
+  }
+};
+
+const rosterOrder = ["C", "A", "S", "E"];
+const order = ["C", "A", "S", "E", "S2"];
+function isSCharacter(id) { return id === "S" || id === "S2"; }
+const ART_REVISION = "case-20261011-splus-eyes-hair-1";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
@@ -106,10 +125,10 @@ function personCard(id) {
   </article>`;
 }
 
-roster.innerHTML = order.map(personCard).join("");
+roster.innerHTML = rosterOrder.map(personCard).join("");
 
 const FUTURE_FORMS = {
-  aquatic: order.map(id => ({ id, name: id === "C" ? "Kraken" : id === "E" ? "Mantis shrimp" : "Undecided" })),
+  aquatic: rosterOrder.map(id => ({ id, name: id === "C" ? "Kraken" : id === "E" ? "Mantis shrimp" : "Undecided" })),
   mythical: [
     { id: "C", name: "Kraken" },
     { id: "A", name: "Black dragon" },
@@ -243,6 +262,10 @@ function startGame() {
 }
 
 document.querySelector("#start-button").addEventListener("click", startGame);
+document.querySelector("#play-refined").addEventListener("click", () => {
+  startGame();
+  switchCharacter("S2");
+});
 document.querySelector("#replay-button").addEventListener("click", resetGame);
 document.querySelector("#home-button").addEventListener("click", () => {
   state.running = false;
@@ -257,7 +280,8 @@ function buildDock() {
     const snowyOwl = id === "E" && state.mode === "flight" && state.snowyOwlTimer > 0;
     const specialName = specialPeacock ? "Peacock" : snowyOwl ? "Snowy owl" : form.animal;
     const specialDetail = specialPeacock ? `${state.peacockTimer.toFixed(1)}s show-off` : snowyOwl ? `${state.snowyOwlTimer.toFixed(1)}s snow-glide` : form.ability;
-    return `<button class="dock-character" data-id="${id}" type="button"><b>${id}</b><span><strong>${specialName}</strong><small>${specialDetail}</small></span></button>`;
+    const variantPrefix = id === "S2" ? "Refined · " : "";
+    return `<button class="dock-character" data-id="${id}" type="button" aria-label="Switch to ${PEOPLE[id].displayName || id}"><b>${PEOPLE[id].shortLabel || id}</b><span><strong>${specialName}</strong><small>${variantPrefix}${specialDetail}</small></span></button>`;
   }).join("");
   dock.querySelectorAll("button").forEach(button => button.addEventListener("click", () => switchCharacter(button.dataset.id)));
 }
@@ -269,7 +293,7 @@ function switchCharacter(id) {
   state.transformFlash = .28;
   state.trail = [];
   updateHud();
-  say(`${id}: ${animalNameFor(id)}`);
+  say(`${PEOPLE[id].displayName || id}: ${animalNameFor(id)}`);
 }
 
 function transform() {
@@ -283,7 +307,7 @@ function transform() {
 
 function animalNameFor(id) {
   if (id === "A" && state.mode === "flight" && state.peacockTimer > 0) return "Peacock";
-  if (id === "S" && state.mode === "flight" && state.batTimer > 0) return "Bat";
+  if (isSCharacter(id) && state.mode === "flight" && state.batTimer > 0) return "Bat";
   if (id === "E" && state.mode === "flight" && state.snowyOwlTimer > 0) return "Great horned owl";
   return PEOPLE[id][state.mode].animal;
 }
@@ -292,13 +316,13 @@ function updateHud() {
   const p = PEOPLE[state.current];
   const f = p[state.mode];
   const initial = document.querySelector("#active-initial");
-  initial.textContent = state.current;
+  initial.textContent = PEOPLE[state.current].shortLabel || state.current;
   initial.style.background = p.accent;
   document.querySelector("#active-animal").textContent = animalNameFor(state.current);
   const formName = state.mode[0].toUpperCase() + state.mode.slice(1);
   const abilityLabel = state.current === "A" && state.mode === "flight" && state.peacockTimer > 0
     ? `Peacock form · ${state.peacockTimer.toFixed(1)}s remaining`
-    : state.current === "S" && state.mode === "flight" && state.batTimer > 0
+    : isSCharacter(state.current) && state.mode === "flight" && state.batTimer > 0
       ? `Bat form · ${state.batTimer.toFixed(1)}s remaining`
       : state.current === "E" && state.mode === "flight" && state.snowyOwlTimer > 0
         ? `Great horned owl · ${state.snowyOwlTimer.toFixed(1)}s remaining`
@@ -325,17 +349,17 @@ function useAbility() {
   if (state.mode === "human") {
     if (id === "C") { state.vy = -16; state.vx += state.facing * 4; }
     if (id === "A") smashNearby(165);
-    if (id === "S") { state.vx = state.facing * 13; state.reveal = 2.5; }
+    if (isSCharacter(id)) { state.vx = state.facing * 13; state.reveal = 2.5; }
     if (id === "E") state.vx = state.facing * 17;
   } else if (state.mode === "flight") {
     if (id === "C") state.vy = -17;
     if (id === "A") state.vx = state.facing * 17;
-    if (id === "S") { state.vy = Math.min(state.vy, -4); state.vx += state.facing * 7; }
+    if (isSCharacter(id)) { state.vy = Math.min(state.vy, -4); state.vx += state.facing * 7; }
     if (id === "E") state.reveal = 4;
   } else {
     if (id === "C") { state.vx = state.facing * 16; revealNearby(); }
     if (id === "A") { state.bite = .42; state.ability = .22; }
-    if (id === "S") state.vx = state.facing * 22;
+    if (isSCharacter(id)) state.vx = state.facing * 22;
     if (id === "E") revealNearby(true);
   }
   say(id === "A" && state.mode === "chaos" ? "Wolf bite!" : PEOPLE[id][state.mode].ability);
@@ -351,7 +375,7 @@ function useSpecial() {
     state.ability = .75;
     smashNearby(210);
     say("Pack-force smash!");
-  } else if (state.current === "S" && state.mode === "flight") {
+  } else if (isSCharacter(state.current) && state.mode === "flight") {
     state.batTimer = 5;
     state.transformFlash = .38;
     updateHud();
@@ -402,7 +426,7 @@ window.addEventListener("keydown", event => {
   if (event.key.toLowerCase() === "e") useAbility();
   if (event.key.toLowerCase() === "r") useSpecial();
   if (event.key.toLowerCase() === "f" || event.key === "Shift") transform();
-  if (["1", "2", "3", "4"].includes(event.key)) switchCharacter(order[Number(event.key) - 1]);
+  if (["1", "2", "3", "4", "5"].includes(event.key)) switchCharacter(order[Number(event.key) - 1]);
 });
 window.addEventListener("keyup", event => {
   if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") keys.left = false;
@@ -461,9 +485,9 @@ function update(dt) {
   state.trailClock -= dt;
 
   let speed = state.level === "space" ? 6.2 : 7.1;
-  if (state.mode === "human" && state.current === "S") speed = 8.1;
+  if (state.mode === "human" && isSCharacter(state.current)) speed = 8.1;
   if (state.mode === "human" && state.current === "E") speed = 8.6;
-  if (state.mode === "chaos" && state.current === "S") speed = 9.5;
+  if (state.mode === "chaos" && isSCharacter(state.current)) speed = 9.5;
   if (state.mode === "chaos" && state.current === "A") speed = 5.6;
   if (keys.left) { state.vx -= 1.25; state.facing = -1; }
   if (keys.right) { state.vx += 1.25; state.facing = 1; }
@@ -475,7 +499,7 @@ function update(dt) {
     state.vy *= .992;
     state.vy = Math.max(-12, Math.min(12, state.vy));
   } else {
-    state.vy += state.mode === "flight" ? (keys.jump ? -.52 : state.current === "S" ? .88 : .34) : .72;
+    state.vy += state.mode === "flight" ? (keys.jump ? -.52 : isSCharacter(state.current) ? .88 : .34) : .72;
     if (keys.down && !state.grounded) state.vy += 1.1;
     state.vy = Math.max(-12, Math.min(state.vy, 18));
   }
@@ -872,11 +896,11 @@ function drawPlayer() {
           : images[state.current][state.mode];
   if (!img.complete || !img.naturalWidth) return;
   let w = state.mode === "human" ? 150 : state.mode === "flight" ? 230 : 245;
-  const animationKey = `${state.current}:${state.mode}`;
+  const animationKey = `${isSCharacter(state.current) ? "S" : state.current}:${state.mode}`;
   const frameCount = !biteImage && runSheet ? (SHEET_FRAME_COUNTS[animationKey] || 4) : 1;
   let h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
   if (state.mode === "human") {
-    const humanWidths = { C: 155, A: 145, S: 142, E: 148 };
+    const humanWidths = { C: 155, A: 145, S: 142, E: 148, S2: 142 };
     w = humanWidths[state.current];
     h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / frameCount)) : w * (img.naturalHeight / img.naturalWidth);
   }
@@ -889,14 +913,14 @@ function drawPlayer() {
   }
   const motion = creatureMotion();
   if (state.mode === "human") {
-    const stature = { A: 1.15, C: 1, S: 1, E: .85 };
-    const width = { A: 1.15, C: 1, S: .96, E: 1 };
+    const stature = { A: 1.15, C: 1, S: 1, E: .85, S2: 1 };
+    const width = { A: 1.15, C: 1, S: .96, E: 1, S2: .96 };
     motion.scaleY *= stature[state.current] || 1;
     motion.scaleX *= width[state.current] || 1;
   }
   if (state.current === "A" && state.mode === "chaos") motion.scaleX *= 1.1;
   if (!biteImage && runSheet) {
-    const animationKey = state.current === "E" && state.mode === "flight" && state.grounded ? "E:flightGround" : `${state.current}:${state.mode}`;
+    const animationKey = state.current === "E" && state.mode === "flight" && state.grounded ? "E:flightGround" : `${isSCharacter(state.current) ? "S" : state.current}:${state.mode}`;
     const cycle = ANIMATION_FRAMES[animationKey] || WALK_CYCLE;
     const rate = state.current === "E" && state.mode === "flight" ? (state.grounded ? .82 : .43) : state.mode === "flight" ? .72 : state.current === "A" && state.mode === "chaos" ? 1.16 : state.current === "C" && state.mode === "human" ? .84 : state.current === "E" && state.mode === "human" ? 1.12 : 1.02;
     motion.frameIndex = (state.motionPhase * rate) % cycle.length;
@@ -904,7 +928,7 @@ function drawPlayer() {
     motion.frameCount = frameCount;
   }
   motion.snowyOwl = false;
-  motion.bat = state.current === "S" && state.mode === "flight" && state.batTimer > 0;
+  motion.bat = isSCharacter(state.current) && state.mode === "flight" && state.batTimer > 0;
   motion.frameBase = greatHornedOwl ? images.E.horned : images[state.current][state.mode];
 
   if (state.level !== "space") {
@@ -1009,9 +1033,9 @@ function creatureMotion() {
       motion.scaleY = 1 + wingbeat * .012;
       motion.scaleX = 1 - wingbeat * .006;
       motion.shadowScale = .62;
-    } else if (Math.abs(state.vx) > .45 && ["C", "A", "S", "E"].includes(state.current)) {
-      const step = Math.sin(phase * (state.current === "S" ? 1.55 : 2.25));
-      if (state.current === "S") {
+    } else if (Math.abs(state.vx) > .45 && ["C", "A", "S", "E", "S2"].includes(state.current)) {
+      const step = Math.sin(phase * (isSCharacter(state.current) ? 1.55 : 2.25));
+      if (isSCharacter(state.current)) {
         // Crow hops use the same approved still artwork; only the grounded position changes.
         motion.y -= Math.max(0, step) * 10.5;
         motion.rotation = step * .014;
