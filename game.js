@@ -59,8 +59,8 @@ PEOPLE.S3 = {
   shortLabel: "S++",
   art: {
     ...PEOPLE.S2.art,
-    human: "assets/forms/s-human-spp-hairline-legs-20261011.webp",
-    selectionHuman: "assets/forms/s-human-spp-hairline-legs-20261011.webp"
+    human: "assets/forms/s-human-spp-hairline-legs-v2-20261011.webp",
+    selectionHuman: "assets/forms/s-human-spp-hairline-legs-v2-20261011.webp"
   },
   human: {
     ...PEOPLE.S2.human,
