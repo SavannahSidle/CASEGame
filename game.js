@@ -52,9 +52,26 @@ PEOPLE.S2 = {
   }
 };
 
+PEOPLE.S3 = {
+  ...PEOPLE.S2,
+  age: "Adult · S++",
+  displayName: "S · S++",
+  shortLabel: "S++",
+  art: {
+    ...PEOPLE.S2.art,
+    human: "assets/forms/s-human-spp-hairline-legs-20261011.webp",
+    selectionHuman: "assets/forms/s-human-spp-hairline-legs-20261011.webp"
+  },
+  human: {
+    ...PEOPLE.S2.human,
+    animal: "Human · S++",
+    description: "Playable S++ duplicate with the revised hairline, forearm tattoo, softened legs, and black mukluks."
+  }
+};
+
 const rosterOrder = ["C", "A", "S", "E"];
-const order = ["C", "A", "S", "E", "S2"];
-function isSCharacter(id) { return id === "S" || id === "S2"; }
+const order = ["C", "A", "S", "E", "S2", "S3"];
+function isSCharacter(id) { return id === "S" || id === "S2" || id === "S3"; }
 const ART_REVISION = "case-20261011-splus-eyes-hair-1";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
@@ -266,6 +283,10 @@ document.querySelector("#play-refined").addEventListener("click", () => {
   startGame();
   switchCharacter("S2");
 });
+document.querySelector("#play-spp").addEventListener("click", () => {
+  startGame();
+  switchCharacter("S3");
+});
 document.querySelector("#replay-button").addEventListener("click", resetGame);
 document.querySelector("#home-button").addEventListener("click", () => {
   state.running = false;
@@ -280,7 +301,7 @@ function buildDock() {
     const snowyOwl = id === "E" && state.mode === "flight" && state.snowyOwlTimer > 0;
     const specialName = specialPeacock ? "Peacock" : snowyOwl ? "Snowy owl" : form.animal;
     const specialDetail = specialPeacock ? `${state.peacockTimer.toFixed(1)}s show-off` : snowyOwl ? `${state.snowyOwlTimer.toFixed(1)}s snow-glide` : form.ability;
-    const variantPrefix = id === "S2" ? "Refined · " : "";
+    const variantPrefix = id === "S3" ? "S++ · " : id === "S2" ? "Refined · " : "";
     return `<button class="dock-character" data-id="${id}" type="button" aria-label="Switch to ${PEOPLE[id].displayName || id}"><b>${PEOPLE[id].shortLabel || id}</b><span><strong>${specialName}</strong><small>${variantPrefix}${specialDetail}</small></span></button>`;
   }).join("");
   dock.querySelectorAll("button").forEach(button => button.addEventListener("click", () => switchCharacter(button.dataset.id)));
@@ -426,7 +447,7 @@ window.addEventListener("keydown", event => {
   if (event.key.toLowerCase() === "e") useAbility();
   if (event.key.toLowerCase() === "r") useSpecial();
   if (event.key.toLowerCase() === "f" || event.key === "Shift") transform();
-  if (["1", "2", "3", "4", "5"].includes(event.key)) switchCharacter(order[Number(event.key) - 1]);
+  if (["1", "2", "3", "4", "5", "6"].includes(event.key)) switchCharacter(order[Number(event.key) - 1]);
 });
 window.addEventListener("keyup", event => {
   if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") keys.left = false;
@@ -900,7 +921,7 @@ function drawPlayer() {
   const frameCount = !biteImage && runSheet ? (SHEET_FRAME_COUNTS[animationKey] || 4) : 1;
   let h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
   if (state.mode === "human") {
-    const humanWidths = { C: 155, A: 145, S: 142, E: 148, S2: 142 };
+    const humanWidths = { C: 155, A: 145, S: 142, E: 148, S2: 142, S3: 142 };
     w = humanWidths[state.current];
     h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / frameCount)) : w * (img.naturalHeight / img.naturalWidth);
   }
@@ -913,8 +934,8 @@ function drawPlayer() {
   }
   const motion = creatureMotion();
   if (state.mode === "human") {
-    const stature = { A: 1.15, C: 1, S: 1, E: .85, S2: 1 };
-    const width = { A: 1.15, C: 1, S: .96, E: 1, S2: .96 };
+    const stature = { A: 1.15, C: 1, S: 1, E: .85, S2: 1, S3: 1 };
+    const width = { A: 1.15, C: 1, S: .96, E: 1, S2: .96, S3: .96 };
     motion.scaleY *= stature[state.current] || 1;
     motion.scaleX *= width[state.current] || 1;
   }
@@ -1033,7 +1054,7 @@ function creatureMotion() {
       motion.scaleY = 1 + wingbeat * .012;
       motion.scaleX = 1 - wingbeat * .006;
       motion.shadowScale = .62;
-    } else if (Math.abs(state.vx) > .45 && ["C", "A", "S", "E", "S2"].includes(state.current)) {
+    } else if (Math.abs(state.vx) > .45 && ["C", "A", "S", "E", "S2", "S3"].includes(state.current)) {
       const step = Math.sin(phase * (isSCharacter(state.current) ? 1.55 : 2.25));
       if (isSCharacter(state.current)) {
         // Crow hops use the same approved still artwork; only the grounded position changes.
@@ -1208,7 +1229,7 @@ function drawHelp() {
   ctx.fillStyle = "rgba(10,14,27,.82)";
   roundedRect(22, 22, 680, 72, 18); ctx.fill();
   ctx.fillStyle = "#fff"; ctx.font = "800 18px system-ui"; ctx.fillText("Move: A/D or ←/→   Jump: W/Space · Hold W to fly", 42, 51);
-  ctx.fillStyle = "#d3d7e2"; ctx.font = "700 15px system-ui"; ctx.fillText("Down: S   Ability: E   Special: R   Transform: F   Switch: 1–5", 42, 78);
+  ctx.fillStyle = "#d3d7e2"; ctx.font = "700 15px system-ui"; ctx.fillText("Down: S   Ability: E   Special: R   Transform: F   Switch: 1–6", 42, 78);
   ctx.restore();
 }
 
