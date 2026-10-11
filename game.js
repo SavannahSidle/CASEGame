@@ -76,8 +76,8 @@ PEOPLE.S4 = {
   shortLabel: "S+++",
   art: {
     ...PEOPLE.S3.art,
-    human: "assets/forms/s-human-sppp-centered-hairline-20261011.webp",
-    selectionHuman: "assets/forms/s-human-sppp-centered-hairline-20261011.webp"
+    human: "assets/forms/s-human-sppp-centered-hairline-cutout-20261011.webp",
+    selectionHuman: "assets/forms/s-human-sppp-centered-hairline-cutout-20261011.webp"
   },
   human: {
     ...PEOPLE.S3.human,
