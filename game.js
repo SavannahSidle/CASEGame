@@ -89,7 +89,7 @@ PEOPLE.S4 = {
 const rosterOrder = ["C", "A", "S", "E"];
 const order = ["C", "A", "S", "E", "S2", "S3", "S4"];
 function isSCharacter(id) { return id === "S" || id === "S2" || id === "S3" || id === "S4"; }
-const ART_REVISION = "case-20261011-a-proportions-1";
+const ART_REVISION = "case-20261011-sppp-fix1";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
