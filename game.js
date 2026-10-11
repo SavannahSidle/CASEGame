@@ -1208,7 +1208,7 @@ function drawHelp() {
   ctx.fillStyle = "rgba(10,14,27,.82)";
   roundedRect(22, 22, 680, 72, 18); ctx.fill();
   ctx.fillStyle = "#fff"; ctx.font = "800 18px system-ui"; ctx.fillText("Move: A/D or ←/→   Jump: W/Space · Hold W to fly", 42, 51);
-  ctx.fillStyle = "#d3d7e2"; ctx.font = "700 15px system-ui"; ctx.fillText("Down: S   Ability: E   Special: R   Transform: F   Switch: 1–4", 42, 78);
+  ctx.fillStyle = "#d3d7e2"; ctx.font = "700 15px system-ui"; ctx.fillText("Down: S   Ability: E   Special: R   Transform: F   Switch: 1–5", 42, 78);
   ctx.restore();
 }
 
