@@ -69,9 +69,26 @@ PEOPLE.S3 = {
   }
 };
 
+PEOPLE.S4 = {
+  ...PEOPLE.S3,
+  age: "Adult · S+++",
+  displayName: "S · S+++",
+  shortLabel: "S+++",
+  art: {
+    ...PEOPLE.S3.art,
+    human: "assets/forms/s-human-sppp-centered-hairline-20261011.webp",
+    selectionHuman: "assets/forms/s-human-sppp-centered-hairline-20261011.webp"
+  },
+  human: {
+    ...PEOPLE.S3.human,
+    animal: "Human · S+++",
+    description: "Playable S+++ duplicate with a centered curved hairline, flatter crown, lighter lifted brows, a tapered nose, and a natural head-to-neck transition."
+  }
+};
+
 const rosterOrder = ["C", "A", "S", "E"];
-const order = ["C", "A", "S", "E", "S2", "S3"];
-function isSCharacter(id) { return id === "S" || id === "S2" || id === "S3"; }
+const order = ["C", "A", "S", "E", "S2", "S3", "S4"];
+function isSCharacter(id) { return id === "S" || id === "S2" || id === "S3" || id === "S4"; }
 const ART_REVISION = "case-20261011-a-proportions-1";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
@@ -287,6 +304,10 @@ document.querySelector("#play-spp").addEventListener("click", () => {
   startGame();
   switchCharacter("S3");
 });
+document.querySelector("#play-sppp").addEventListener("click", () => {
+  startGame();
+  switchCharacter("S4");
+});
 document.querySelector("#replay-button").addEventListener("click", resetGame);
 document.querySelector("#home-button").addEventListener("click", () => {
   state.running = false;
@@ -301,7 +322,7 @@ function buildDock() {
     const snowyOwl = id === "E" && state.mode === "flight" && state.snowyOwlTimer > 0;
     const specialName = specialPeacock ? "Peacock" : snowyOwl ? "Snowy owl" : form.animal;
     const specialDetail = specialPeacock ? `${state.peacockTimer.toFixed(1)}s show-off` : snowyOwl ? `${state.snowyOwlTimer.toFixed(1)}s snow-glide` : form.ability;
-    const variantPrefix = id === "S3" ? "S++ · " : id === "S2" ? "Refined · " : "";
+    const variantPrefix = id === "S4" ? "S+++ · " : id === "S3" ? "S++ · " : id === "S2" ? "Refined · " : "";
     return `<button class="dock-character" data-id="${id}" type="button" aria-label="Switch to ${PEOPLE[id].displayName || id}"><b>${PEOPLE[id].shortLabel || id}</b><span><strong>${specialName}</strong><small>${variantPrefix}${specialDetail}</small></span></button>`;
   }).join("");
   dock.querySelectorAll("button").forEach(button => button.addEventListener("click", () => switchCharacter(button.dataset.id)));
@@ -921,7 +942,7 @@ function drawPlayer() {
   const frameCount = !biteImage && runSheet ? (SHEET_FRAME_COUNTS[animationKey] || 4) : 1;
   let h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
   if (state.mode === "human") {
-    const humanWidths = { C: 155, A: 145, S: 142, E: 148, S2: 142, S3: 142 };
+    const humanWidths = { C: 155, A: 145, S: 142, E: 148, S2: 142, S3: 142, S4: 142 };
     w = humanWidths[state.current];
     h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / frameCount)) : w * (img.naturalHeight / img.naturalWidth);
   }
@@ -934,8 +955,8 @@ function drawPlayer() {
   }
   const motion = creatureMotion();
   if (state.mode === "human") {
-    const stature = { A: 1.15, C: 1, S: 1, E: .85, S2: 1, S3: 1 };
-    const width = { A: 1.15, C: 1, S: .96, E: 1, S2: .96, S3: .96 };
+    const stature = { A: 1.15, C: 1, S: 1, E: .85, S2: 1, S3: 1, S4: 1 };
+    const width = { A: 1.15, C: 1, S: .96, E: 1, S2: .96, S3: .96, S4: .96 };
     motion.scaleY *= stature[state.current] || 1;
     motion.scaleX *= width[state.current] || 1;
   }
