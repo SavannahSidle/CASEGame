@@ -12,7 +12,7 @@ const PEOPLE = {
   A: {
     age: "Adult",
     accent: "#d84c59",
-    art: { human: "assets/forms/a-human-realism-50pass-20261011.webp", selectionHuman: "assets/forms/a-human-realism-50pass-20261011.webp", run: "assets/forms/a-human-run-20261010.webp?v=case-20261011-a2", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run-20261010.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run-20261010.webp", bite: "assets/forms/a-wolf-bite.webp" },
+    art: { human: "assets/forms/a-human-realism-collarbone-bun-cargo-20261011.webp", selectionHuman: "assets/forms/a-human-realism-collarbone-bun-cargo-20261011.webp", run: "assets/forms/a-human-run-20261010.webp?v=case-20261011-a2", flight: "assets/forms/a-raven.webp", flightRun: "assets/forms/a-raven-run.webp", peacock: "assets/forms/a-flight.webp", peacockRun: "assets/forms/a-flight-run-20261010.webp", chaos: "assets/forms/a-chaos.webp", chaosRun: "assets/forms/a-chaos-run-20261010.webp", bite: "assets/forms/a-wolf-bite.webp" },
     human: { animal: "Human", ability: "Protective force", description: "Remove an obstacle from everyone else's problem list." },
     flight: { animal: "Raven", ability: "Hooked-beak rush", description: "A huge raven with a beak built for dramatic entrances." },
     chaos: { animal: "Giant black wolf", ability: "Bite · E / Pack-force smash · R", description: "Bite, then clear a path with enormous protective wolf energy." }
@@ -72,7 +72,7 @@ PEOPLE.S3 = {
 const rosterOrder = ["C", "A", "S", "E"];
 const order = ["C", "A", "S", "E", "S2", "S3"];
 function isSCharacter(id) { return id === "S" || id === "S2" || id === "S3"; }
-const ART_REVISION = "case-20261011-splus-eyes-hair-1";
+const ART_REVISION = "case-20261011-a-standing-realism-1";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
