@@ -80,7 +80,7 @@ button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .form-art { position: absolute; z-index: 1; top: 55px; left: 5%; right: auto; bottom: auto; display: block; width: 90%; height: auto; max-height: calc(100% - 168px); object-fit: contain; object-position: center bottom; background: none; transform-origin: center bottom; filter: drop-shadow(0 18px 12px rgba(0,0,0,.36)); transition: opacity .2s, transform .5s; }
 /* Human stature tiers; animal transformations keep their existing sizing. */
 .character-card:not(.flight):not(.chaos)[data-id="A"] .form-art { transform: scale(1.15, 1.15); }
-.character-card:not(.flight):not(.chaos)[data-id="S"] .form-art { inset: 55px auto auto 50%; width: auto; height: auto; max-width: 90%; max-height: calc(100% - 168px); object-fit: contain; background: #000; transform: translateX(-50%); }
+.character-card:not(.flight):not(.chaos)[data-id="S"] .form-art { inset: 55px auto auto 50%; width: auto; height: auto; max-width: 90%; max-height: calc(100% - 168px); object-fit: contain; background: transparent; transform: translateX(-50%); }
 .character-card.chaos .form-art { transform: scale(1.02); }
 .character-card.flight[data-id="A"] .form-art { transform: scale(1.28); translate: 0 -8px; }
 .character-card.flight[data-id="S"] .form-art { transform: scale(1.04); translate: 0 -8px; }
