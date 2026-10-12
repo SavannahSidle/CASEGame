@@ -93,8 +93,8 @@ PEOPLE.S5 = {
   shortLabel: "S++++",
   art: {
     ...PEOPLE.S4.art,
-    human: "assets/forms/s-human-s5-approved-20261012.webp",
-    selectionHuman: "assets/forms/s-human-s5-approved-20261012.webp",
+    human: "assets/forms/s-human-s5-long-straight-20261012.png",
+    selectionHuman: "assets/forms/s-human-s5-long-straight-20261012.png",
   },
   human: {
     ...PEOPLE.S4.human,
