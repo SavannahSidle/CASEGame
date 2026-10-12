@@ -103,9 +103,26 @@ PEOPLE.S5 = {
   }
 };
 
+PEOPLE.S6 = {
+  ...PEOPLE.S5,
+  age: "Adult · S+++++",
+  displayName: "S · Face Refined",
+  shortLabel: "S+++++",
+  art: {
+    ...PEOPLE.S5.art,
+    human: "assets/forms/s-human-s6-face-refined-20261012.png",
+    selectionHuman: "assets/forms/s-human-s6-face-refined-20261012.png"
+  },
+  human: {
+    ...PEOPLE.S5.human,
+    animal: "Human · Face Refined",
+    description: "Long straight-haired S with the refined lips, brows, hairline, and slightly wider corset area."
+  }
+};
+
 const rosterOrder = ["C", "A", "S", "E"];
-const order = ["C", "A", "S", "E", "S2", "S3", "S4", "S5"];
-function isSCharacter(id) { return id === "S" || id === "S2" || id === "S3" || id === "S4" || id === "S5"; }
+const order = ["C", "A", "S", "E", "S2", "S3", "S4", "S5", "S6"];
+function isSCharacter(id) { return id === "S" || id === "S2" || id === "S3" || id === "S4" || id === "S5" || id === "S6"; }
 const ART_REVISION = "case-20261011-sppp-fix1";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
@@ -975,7 +992,7 @@ function drawPlayer() {
   const frameAspect = (img.naturalHeight / frameRows) / (img.naturalWidth / frameColumns);
   let h = w * frameAspect;
   if (state.mode === "human") {
-    const humanWidths = { C: 155, A: 145, S: 142, E: 148, S2: 142, S3: 142, S4: 142, S5: 142 };
+    const humanWidths = { C: 155, A: 145, S: 142, E: 148, S2: 142, S3: 142, S4: 142, S5: 142, S6: 142 };
     w = humanWidths[state.current];
     h = runningHuman ? w * frameAspect : w * (img.naturalHeight / img.naturalWidth);
   }
@@ -988,8 +1005,8 @@ function drawPlayer() {
   }
   const motion = creatureMotion();
   if (state.mode === "human") {
-    const stature = { A: 1.15, C: 1, S: 1, E: .85, S2: 1, S3: 1, S4: 1, S5: 1 };
-    const width = { A: 1.15, C: 1, S: .96, E: 1, S2: .96, S3: .96, S4: .96, S5: .96 };
+    const stature = { A: 1.15, C: 1, S: 1, E: .85, S2: 1, S3: 1, S4: 1, S5: 1, S6: 1 };
+    const width = { A: 1.15, C: 1, S: .96, E: 1, S2: .96, S3: .96, S4: .96, S5: .96, S6: .96 };
     motion.scaleY *= stature[state.current] || 1;
     motion.scaleX *= width[state.current] || 1;
   }
