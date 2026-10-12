@@ -81,7 +81,6 @@ button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 /* Human stature tiers; animal transformations keep their existing sizing. */
 .character-card:not(.flight):not(.chaos)[data-id="A"] .form-art { transform: scale(1.15, 1.15); }
 .character-card:not(.flight):not(.chaos)[data-id="S"] .form-art { inset: 55px auto auto 50%; width: auto; height: auto; max-width: 90%; max-height: calc(100% - 168px); object-fit: contain; background: #000; transform: translateX(-50%); }
-.character-card:not(.flight):not(.chaos)[data-id="E"] .form-art { transform: scale(.98, .85); }
 .character-card.chaos .form-art { transform: scale(1.02); }
 .character-card.flight[data-id="A"] .form-art { transform: scale(1.28); translate: 0 -8px; }
 .character-card.flight[data-id="S"] .form-art { transform: scale(1.04); translate: 0 -8px; }
