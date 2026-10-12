@@ -95,7 +95,6 @@ PEOPLE.S5 = {
     ...PEOPLE.S4.art,
     human: "assets/forms/s-human-s5-approved-20261012.webp",
     selectionHuman: "assets/forms/s-human-s5-approved-20261012.webp",
-    run: "assets/forms/s-human-s5-approved-20261012.webp"
   },
   human: {
     ...PEOPLE.S4.human,
@@ -960,7 +959,7 @@ function drawPlayer() {
   const frameCount = !biteImage && runSheet ? (SHEET_FRAME_COUNTS[animationKey] || 4) : 1;
   let h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
   if (state.mode === "human") {
-    const humanWidths = { C: 155, A: 145, S: 142, E: 148, S2: 142, S3: 142, S4: 142 };
+    const humanWidths = { C: 155, A: 145, S: 142, E: 148, S2: 142, S3: 142, S4: 142, S5: 142 };
     w = humanWidths[state.current];
     h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / frameCount)) : w * (img.naturalHeight / img.naturalWidth);
   }
@@ -973,8 +972,8 @@ function drawPlayer() {
   }
   const motion = creatureMotion();
   if (state.mode === "human") {
-    const stature = { A: 1.15, C: 1, S: 1, E: .85, S2: 1, S3: 1, S4: 1 };
-    const width = { A: 1.15, C: 1, S: .96, E: 1, S2: .96, S3: .96, S4: .96 };
+    const stature = { A: 1.15, C: 1, S: 1, E: .85, S2: 1, S3: 1, S4: 1, S5: 1 };
+    const width = { A: 1.15, C: 1, S: .96, E: 1, S2: .96, S3: .96, S4: .96, S5: .96 };
     motion.scaleY *= stature[state.current] || 1;
     motion.scaleX *= width[state.current] || 1;
   }
