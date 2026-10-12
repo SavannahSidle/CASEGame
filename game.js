@@ -119,19 +119,20 @@ const ANIMATION_FRAMES = {
   "A:chaos": [0, 1, 2, 3, 4, 3, 2, 1],
   // Keep the existing run art; these gentle frame holds give C and E distinct, natural strides.
   "C:human": [0, 1, 2, 3, 2, 1],
-  "E:human": [0, 1, 2, 3, 1, 2],
+  "E:human": [0, 1, 2, 3, 4, 5, 6, 7],
   // Skip the owl sheet's front-facing outlier; the repeated downstroke gives it a calm glide.
   "E:flight": [0, 1, 2, 3],
   "E:flightGround": [0, 1, 2, 1]
 };
 const WALK_CYCLE = [0, 1, 2, 3];
-const SHEET_FRAME_COUNTS = { "A:human": 5, "A:chaos": 5 };
+const SHEET_FRAME_COUNTS = { "A:human": 5, "A:chaos": 5, "E:human": 8 };
+const SHEET_FRAME_COLUMNS = { "E:human": 4 };
 const frameBoxes = new WeakMap();
 
-function getAlphaBoxes(img, count = 1) {
+function getAlphaBoxes(img, count = 1, columns = count) {
   if (!img?.complete || !img.naturalWidth || !img.naturalHeight) return [];
   const cached = frameBoxes.get(img);
-  if (cached?.count === count) return cached.boxes;
+  if (cached?.count === count && cached?.columns === columns) return cached.boxes;
   const canvas = document.createElement("canvas");
   canvas.width = img.naturalWidth;
   canvas.height = img.naturalHeight;
@@ -140,27 +141,39 @@ function getAlphaBoxes(img, count = 1) {
   let pixels;
   try { pixels = scan.getImageData(0, 0, canvas.width, canvas.height).data; }
   catch { return []; }
-  const cellW = canvas.width / count;
+  const rows = Math.ceil(count / columns);
+  const cellW = canvas.width / columns;
+  const cellH = canvas.height / rows;
   const boxes = Array.from({ length: count }, () => ({ x: Infinity, y: Infinity, right: -Infinity, bottom: -Infinity }));
   for (let y = 0; y < canvas.height; y++) {
     for (let x = 0; x < canvas.width; x++) {
       if (pixels[(y * canvas.width + x) * 4 + 3] < 20) continue;
-      const box = boxes[Math.min(count - 1, Math.floor(x / cellW))];
-      const localX = x % cellW;
+      const col = Math.min(columns - 1, Math.floor(x / cellW));
+      const row = Math.min(rows - 1, Math.floor(y / cellH));
+      const index = Math.min(count - 1, row * columns + col);
+      const box = boxes[index];
+      const localX = x - col * cellW;
+      const localY = y - row * cellH;
       box.x = Math.min(box.x, localX);
-      box.y = Math.min(box.y, y);
+      box.y = Math.min(box.y, localY);
       box.right = Math.max(box.right, localX + 1);
-      box.bottom = Math.max(box.bottom, y + 1);
+      box.bottom = Math.max(box.bottom, localY + 1);
     }
   }
-  const result = boxes.map(box => {
+  const result = boxes.map((box, index) => {
     if (!Number.isFinite(box.x)) return null;
     const pad = 3;
     const x = Math.max(0, Math.floor(box.x) - pad);
     const y = Math.max(0, Math.floor(box.y) - pad);
-    return { x, y, width: Math.min(cellW - x, Math.ceil(box.right) + pad - x), height: Math.min(canvas.height - y, Math.ceil(box.bottom) + pad - y) };
+    const col = index % columns;
+    const row = Math.floor(index / columns);
+    return {
+      x, y,
+      width: Math.min(cellW - x, Math.ceil(box.right) + pad - x),
+      height: Math.min(cellH - y, Math.ceil(box.bottom) + pad - y)
+    };
   });
-  frameBoxes.set(img, { count, boxes: result });
+  frameBoxes.set(img, { count, columns, boxes: result });
   return result;
 }
 
@@ -957,18 +970,21 @@ function drawPlayer() {
   let w = state.mode === "human" ? 150 : state.mode === "flight" ? 230 : 245;
   const animationKey = `${isSCharacter(state.current) ? "S" : state.current}:${state.mode}`;
   const frameCount = !biteImage && runSheet ? (SHEET_FRAME_COUNTS[animationKey] || 4) : 1;
-  let h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
+  const frameColumns = runSheet ? (SHEET_FRAME_COLUMNS[animationKey] || frameCount) : 1;
+  const frameRows = runSheet ? Math.ceil(frameCount / frameColumns) : 1;
+  const frameAspect = (img.naturalHeight / frameRows) / (img.naturalWidth / frameColumns);
+  let h = w * frameAspect;
   if (state.mode === "human") {
     const humanWidths = { C: 155, A: 145, S: 142, E: 148, S2: 142, S3: 142, S4: 142, S5: 142 };
     w = humanWidths[state.current];
-    h = runningHuman ? w * (img.naturalHeight / (img.naturalWidth / frameCount)) : w * (img.naturalHeight / img.naturalWidth);
+    h = runningHuman ? w * frameAspect : w * (img.naturalHeight / img.naturalWidth);
   }
-  if (state.current === "A" && state.mode === "flight") { w = peacock ? 230 : 260; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
-  if (state.current === "A" && state.mode === "chaos") { w = 300; h = w * (img.naturalHeight / (img.naturalWidth / frameCount)); }
+  if (state.current === "A" && state.mode === "flight") { w = peacock ? 230 : 260; h = w * frameAspect; }
+  if (state.current === "A" && state.mode === "chaos") { w = 300; h = w * frameAspect; }
   if (state.current === "E" && state.mode === "flight" && flying && runSheet) {
     // Keep the owl's spread-wing poses close to the standing owl's on-screen scale.
     w = 185;
-    h = w * (img.naturalHeight / (img.naturalWidth / frameCount));
+    h = w * frameAspect;
   }
   const motion = creatureMotion();
   if (state.mode === "human") {
@@ -981,10 +997,11 @@ function drawPlayer() {
   if (!biteImage && runSheet) {
     const animationKey = state.current === "E" && state.mode === "flight" && state.grounded ? "E:flightGround" : `${isSCharacter(state.current) ? "S" : state.current}:${state.mode}`;
     const cycle = ANIMATION_FRAMES[animationKey] || WALK_CYCLE;
-    const rate = state.current === "E" && state.mode === "flight" ? (state.grounded ? .82 : .43) : state.mode === "flight" ? .72 : state.current === "A" && state.mode === "chaos" ? 1.16 : state.current === "C" && state.mode === "human" ? .84 : state.current === "E" && state.mode === "human" ? 1.12 : 1.02;
+    const rate = state.current === "E" && state.mode === "flight" ? (state.grounded ? .82 : .43) : state.mode === "flight" ? .72 : state.current === "A" && state.mode === "chaos" ? 1.16 : state.current === "C" && state.mode === "human" ? .84 : state.current === "E" && state.mode === "human" ? 1.5 : 1.02;
     motion.frameIndex = (state.motionPhase * rate) % cycle.length;
     motion.frameSequence = cycle;
     motion.frameCount = frameCount;
+    motion.frameColumns = frameColumns;
   }
   motion.snowyOwl = false;
   motion.bat = isSCharacter(state.current) && state.mode === "flight" && state.batTimer > 0;
@@ -1228,7 +1245,7 @@ function drawCreature(img, w, h, motion) {
     const framePosition = ((motion.frameIndex % sequence.length) + sequence.length) % sequence.length;
     // Use discrete poses. Crossfading transparent cutouts creates doubled edges and apparent blinking.
     const frameIndex = sequence[Math.floor(framePosition)];
-    drawNormalizedFrame(img, frameCount, frameIndex, motion.frameBase, w, h);
+    drawNormalizedFrame(img, frameCount, frameIndex, motion.frameBase, w, h, motion.frameColumns || frameCount);
   } else if (motion.wave && !motion.ghost) {
     const strips = 14;
     const sourceW = img.naturalWidth / strips;
@@ -1243,21 +1260,26 @@ function drawCreature(img, w, h, motion) {
   ctx.restore();
 }
 
-function drawNormalizedFrame(img, frameCount, frameIndex, reference, w, h) {
-  const boxes = getAlphaBoxes(img, frameCount);
+function drawNormalizedFrame(img, frameCount, frameIndex, reference, w, h, columns = frameCount) {
+  const rows = Math.ceil(frameCount / columns);
+  const cellW = img.naturalWidth / columns;
+  const cellH = img.naturalHeight / rows;
+  const col = frameIndex % columns;
+  const row = Math.floor(frameIndex / columns);
+  const offsetX = col * cellW;
+  const offsetY = row * cellH;
+  const boxes = getAlphaBoxes(img, frameCount, columns);
   const box = boxes[frameIndex];
   const refBox = getAlphaBoxes(reference, 1)[0];
   if (!box || !refBox) {
-    const cellW = img.naturalWidth / frameCount;
-    ctx.drawImage(img, frameIndex * cellW, 0, cellW, img.naturalHeight, -w * .5, -h * .95, w, h);
+    ctx.drawImage(img, offsetX, offsetY, cellW, cellH, -w * .5, -h * .95, w, h);
     return;
   }
   const targetSize = Math.max(refBox.width * (w / reference.naturalWidth), refBox.height * (h / reference.naturalHeight));
   const scale = targetSize / Math.max(box.width, box.height);
-  const cellW = img.naturalWidth / frameCount;
   const dw = box.width * scale;
   const dh = box.height * scale;
-  ctx.drawImage(img, frameIndex * cellW + box.x, box.y, box.width, box.height, -dw * .5, -dh, dw, dh);
+  ctx.drawImage(img, offsetX + box.x, offsetY + box.y, box.width, box.height, -dw * .5, -dh, dw, dh);
 }
 
 function drawHelp() {
