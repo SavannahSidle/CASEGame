@@ -86,9 +86,27 @@ PEOPLE.S4 = {
   }
 };
 
+PEOPLE.S5 = {
+  ...PEOPLE.S4,
+  age: "Adult · S++++",
+  displayName: "S · Approved",
+  shortLabel: "S++++",
+  art: {
+    ...PEOPLE.S4.art,
+    human: "assets/forms/s-human-s5-approved-20261012.webp",
+    selectionHuman: "assets/forms/s-human-s5-approved-20261012.webp",
+    run: "assets/forms/s-human-s5-approved-20261012.webp"
+  },
+  human: {
+    ...PEOPLE.S4.human,
+    animal: "Human · Approved S",
+    description: "Approved S design with the current face, long dark hair, paw tattoos, and sleeve tattoo."
+  }
+};
+
 const rosterOrder = ["C", "A", "S", "E"];
-const order = ["C", "A", "S", "E", "S2", "S3", "S4"];
-function isSCharacter(id) { return id === "S" || id === "S2" || id === "S3" || id === "S4"; }
+const order = ["C", "A", "S", "E", "S2", "S3", "S4", "S5"];
+function isSCharacter(id) { return id === "S" || id === "S2" || id === "S3" || id === "S4" || id === "S5"; }
 const ART_REVISION = "case-20261011-sppp-fix1";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
