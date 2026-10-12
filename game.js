@@ -76,13 +76,13 @@ PEOPLE.S4 = {
   shortLabel: "S+++",
   art: {
     ...PEOPLE.S3.art,
-    human: "assets/forms/s-human-sppp-centered-hairline-cutout-20261011.webp",
-    selectionHuman: "assets/forms/s-human-sppp-centered-hairline-cutout-20261011.webp"
+    human: "assets/forms/s-human-sppp-jaw-torso-refined-20261012.webp",
+    selectionHuman: "assets/forms/s-human-sppp-jaw-torso-refined-20261012.webp"
   },
   human: {
     ...PEOPLE.S3.human,
     animal: "Human · S+++",
-    description: "Playable S+++ duplicate with a centered curved hairline, flatter crown, lighter lifted brows, a tapered nose, and a natural head-to-neck transition."
+    description: "Playable S+++ duplicate with a subtly fuller youthful jaw and cheeks, a more natural torso, and the approved hair, tattoos, outfit, and bare feet."
   }
 };
 
