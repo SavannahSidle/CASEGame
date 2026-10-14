@@ -20,7 +20,7 @@ const PEOPLE = {
   S: {
     age: "Adult",
     accent: "#91a99b",
-    art: { human: "assets/forms/s-human-hands-detail-slim-calves-20261014.webp", selectionHuman: "assets/forms/s-human-pony-mukluks-upper-arm-stars-backside-20261014.webp", run: "assets/forms/s-human-run-refined-20261011.webp", flight: "assets/forms/s-flight.webp", flightRun: "assets/forms/s-flight-run.webp", chaos: "assets/forms/s-chaos.webp", chaosRun: "assets/forms/s-chaos-run-20261010.webp" },
+    art: { human: "assets/forms/s-human-hands-detail-slim-calves-20261014.webp", selectionHuman: "assets/forms/s-human-hands-detail-slim-calves-20261014.webp", run: "assets/forms/s-human-run-refined-20261011.webp", flight: "assets/forms/s-flight.webp", flightRun: "assets/forms/s-flight-run.webp", chaos: "assets/forms/s-chaos.webp", chaosRun: "assets/forms/s-chaos-run-20261010.webp" },
     human: { animal: "Human", ability: "Intellect", description: "Read the pattern, connect the clues, and find the best move." },
     flight: { animal: "Crow", ability: "Bright idea", description: "Glide, scout, and attract useful shiny things." },
     chaos: { animal: "Slim black panther", ability: "Silent pounce", description: "Slip out of sight, then reappear exactly where useful." }
