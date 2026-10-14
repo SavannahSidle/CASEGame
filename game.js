@@ -4,7 +4,7 @@ const PEOPLE = {
   C: {
     age: "Teenager",
     accent: "#aa78ef",
-    art: { human: "assets/forms/c-human-rpg-style-e-20261012-v8.webp", selectionHuman: "assets/forms/c-human-rpg-style-e-20261012-v8.webp", run: "assets/forms/c-human-run-20261010.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
+    art: { human: "assets/forms/c-human-rpg-neutral-stance-side-look-20261014.webp", selectionHuman: "assets/forms/c-human-rpg-neutral-stance-side-look-20261014.webp", run: "assets/forms/c-human-run-20261010.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
     human: { animal: "Human", ability: "Improvised vault", description: "Find the shortcut by confidently making one up." },
     flight: { animal: "Flamingo", ability: "Stilt vault", description: "Take real, high-stepping strides across the ground, then lift off." },
     chaos: { animal: "Red fox", ability: "Burrow dash", description: "Dig shortcuts and outfox objects with no brain." }
