@@ -4,7 +4,7 @@ const PEOPLE = {
   C: {
     age: "Teenager",
     accent: "#aa78ef",
-    art: { human: "assets/forms/c-human-rpg-neutral-stance-side-look-20261014.webp", selectionHuman: "assets/forms/c-human-rpg-neutral-stance-side-look-20261014.webp", run: "assets/forms/c-human-run-20261010.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
+    art: { human: "assets/forms/c-human-crisp-cel-shaded-20261017.webp", selectionHuman: "assets/forms/c-human-crisp-cel-shaded-20261017.webp", run: "assets/forms/c-human-run-20261010.webp", flight: "assets/forms/c-flight.webp", flightRun: "assets/forms/c-flight-run.webp", chaos: "assets/forms/c-chaos.webp", chaosRun: "assets/forms/c-chaos-run.webp" },
     human: { animal: "Human", ability: "Improvised vault", description: "Find the shortcut by confidently making one up." },
     flight: { animal: "Flamingo", ability: "Stilt vault", description: "Take real, high-stepping strides across the ground, then lift off." },
     chaos: { animal: "Red fox", ability: "Burrow dash", description: "Dig shortcuts and outfox objects with no brain." }
@@ -123,7 +123,7 @@ PEOPLE.S6 = {
 const rosterOrder = ["C", "A", "S", "E"];
 const order = ["C", "A", "S", "E", "S2", "S3", "S4", "S5", "S6"];
 function isSCharacter(id) { return id === "S" || id === "S2" || id === "S3" || id === "S4" || id === "S5" || id === "S6"; }
-const ART_REVISION = "case-20261011-sppp-fix1";
+const ART_REVISION = "case-20261017-c-cel-clothes";
 for (const person of Object.values(PEOPLE)) {
   for (const key of Object.keys(person.art)) person.art[key] += `?v=${ART_REVISION}`;
 }
